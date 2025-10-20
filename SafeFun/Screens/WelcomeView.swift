@@ -14,6 +14,7 @@ struct WelcomeView: View {
                 .imageScale(.large)
                 .foregroundStyle(.tint)
             Text("Hello, world!")
+                .foregroundStyle(.wcRed)
         }
         .padding()
     }
