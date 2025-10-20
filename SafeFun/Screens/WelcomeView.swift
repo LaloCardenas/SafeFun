@@ -8,17 +8,30 @@
 import SwiftUI
 
 struct WelcomeView: View {
-    @State private var selectedLanguage: String = "English"
-    private let languages: [String] = ["English", "Español"]
+    @State private var selectedCountry: String = "United States"
+
+    // Country list storing the display name and its flag emoji
+    private let countries: [(name: String, flag: String)] = [
+        ("United States", "🇺🇸"),
+        ("Mexico", "🇲🇽"),
+        ("Canada", "🇨🇦"),
+        ("Argentina", "🇦🇷"),
+        ("Brazil", "🇧🇷"),
+        ("United Kingdom", "🇬🇧"),
+        ("Spain", "🇪🇸"),
+        ("France", "🇫🇷"),
+        ("Germany", "🇩🇪"),
+        ("Japan", "🇯🇵")
+    ]
 
     var body: some View {
         NavigationStack {
             ZStack {
-                BackgroundView() // fondo reutilizable
-                // Contenedor principal
+                BackgroundView() // reusable background
+                // Main container
                 VStack {
                     Spacer()
-                    // Sección 1: Título y subtítulo
+                    // Section 1: Title and subtitle
                     VStack(spacing: 16) {
                         Text("Welcome to SafeFun!")
                             .font(.system(size: 64, weight: .bold, design: .rounded))
@@ -35,27 +48,34 @@ struct WelcomeView: View {
                     .frame(maxWidth: 700)
                     .padding(.top, 24)
 
-                    // Espacio entre sección 1 y 2
+                    // Space between section 1 and 2
                     Spacer(minLength: 24)
 
-                    // Sección 2: Picker de idioma
+                    // Section 2: Country picker
                     VStack(spacing: 12) {
                         HStack(spacing: 12) {
-                            Image(systemName: "globe")
-                                .foregroundStyle(.white.opacity(0.9))
-
-                            Picker("Language", selection: $selectedLanguage) {
-                                ForEach(languages, id: \.self) { lang in
-                                    Text(lang).tag(lang)
+                            // Picker con label solo de bandera (Opción B)
+                            Picker(selection: $selectedCountry) {
+                                ForEach(countries, id: \.name) { item in
+                                    HStack {
+                                        Text(item.flag)
+                                    }
+                                    .tag(item.name)
                                 }
+                            } label: {
+                                Text(flagForSelectedCountry)
                             }
                             .pickerStyle(.menu)
                             .tint(.white)
                             .foregroundStyle(.white)
+
+                            // Nombre del país seleccionado siempre visible a la derecha
+                            Text(selectedCountry)
+                                .font(.system(size: 24))
+                                .foregroundStyle(.white)
                         }
                         .padding(.horizontal, 16)
                         .padding(.vertical, 12)
-                        .frame(maxWidth: .infinity)
                         .background(.white.opacity(0.12))
                         .clipShape(RoundedRectangle(cornerRadius: 14, style: .continuous))
                         .overlay(
@@ -66,12 +86,12 @@ struct WelcomeView: View {
                     }
                     .frame(maxWidth: 700)
 
-                    // Espacio entre sección 2 y 3 (un poco mayor para separar controles de botones)
+                    // Space between section 2 and 3
                     Spacer(minLength: 36)
 
-                    // Sección 3: Botones
+                    // Section 3: Buttons
                     VStack(spacing: 14) {
-                        // Botón principal: Sign Up (navega a SignUpView)
+                        // Primary button: Sign Up
                         NavigationLink {
                             SignUpView()
                         } label: {
@@ -79,13 +99,13 @@ struct WelcomeView: View {
                                 .font(.system(size: 20, weight: .bold, design: .rounded))
                                 .frame(maxWidth: .infinity)
                                 .padding(.vertical, 14)
-                                .background(Color.wcGold) // contraste alto
-                                .foregroundStyle(Color.black) // mejor legibilidad sobre dorado
+                                .background(Color.wcGold)
+                                .foregroundStyle(Color.black)
                                 .clipShape(RoundedRectangle(cornerRadius: 14, style: .continuous))
                         }
                         .shadow(color: .black.opacity(0.25), radius: 10, x: 0, y: 8)
 
-                        // Botón secundario: Log In (navega a LogInView) con mayor contraste
+                        // Secondary button: Log In
                         NavigationLink {
                             LogInView()
                         } label: {
@@ -94,20 +114,25 @@ struct WelcomeView: View {
                                 .frame(maxWidth: .infinity)
                                 .padding(.vertical, 12)
                                 .foregroundStyle(.white)
-                                .background(Color.wcPurple) // color sólido y contrastante
+                                .background(Color.wcPurple)
                                 .clipShape(RoundedRectangle(cornerRadius: 14, style: .continuous))
                         }
                         .shadow(color: .black.opacity(0.25), radius: 10, x: 0, y: 8)
                     }
                     .frame(maxWidth: 700)
 
-                    // Espacio inferior para respirar en pantallas altas
+                    // Bottom spacing
                     Spacer(minLength: 24)
                 }
                 .padding(.horizontal)
             }
             .navigationBarHidden(true)
         }
+    }
+
+    // MARK: - Derived
+    private var flagForSelectedCountry: String {
+        countries.first(where: { $0.name == selectedCountry })?.flag ?? "🏳️"
     }
 }
 

@@ -13,6 +13,7 @@ struct LogInView: View {
     @State private var password: String = ""
     @State private var isSecure: Bool = true
     @State private var isLoading: Bool = false
+    @State private var goToSignUp: Bool = false
 
     // Action purple (adjust to your palette when you have it)
     private let actionPurple = Color(hex: 0x6C2CF4)
@@ -25,6 +26,13 @@ struct LogInView: View {
                 Spacer()
                 VStack(alignment: .leading, spacing: 20) {
                     
+                    // Navegación programática hacia SignUpView usando NavigationStack API moderna
+                    Color.clear
+                        .frame(height: 0)
+                        .navigationDestination(isPresented: $goToSignUp) {
+                            SignUpView()
+                        }
+                    
                     // Title SafeFun
                     Text("SafeFun")
                         .font(.system(size: 36, weight: .bold, design: .rounded))
@@ -34,7 +42,7 @@ struct LogInView: View {
                         .padding(.top, 24)
                     
                     // Subtitle
-                    Text("Sign Up")
+                    Text("Login")
                         .font(.system(size: 22, weight: .bold, design: .rounded))
                         .foregroundStyle(.primary)
                         .shadow(color: .black.opacity(0.25), radius: 8, x: 0, y: 6)
@@ -63,7 +71,7 @@ struct LogInView: View {
 
                     // Password
                     VStack(alignment: .leading, spacing: 8) {
-                        Text("Enter a password")
+                        Text("Enter your password")
                             .font(.subheadline)
                             .foregroundStyle(.primary.opacity(0.9))
 
@@ -116,15 +124,15 @@ struct LogInView: View {
                     .buttonStyle(.plain)
                     .padding(.top, 6)
 
-                    // Link to log in
+                    // Link to sign up
                     HStack(spacing: 6) {
                         Spacer()
-                        Text("Already have an account?")
+                        Text("Don't have an account?")
                             .foregroundStyle(.secondary)
                             .foregroundStyle(.white)
                             .font(.subheadline)
-                        Button("Log In") {
-                            onGoToLogin()
+                        Button("Sign Up") {
+                            onToSignUp()
                         }
                         .font(.subheadline.weight(.semibold))
                         .foregroundStyle(actionPurple)
@@ -178,27 +186,7 @@ struct LogInView: View {
                     .frame(height: 52)
                     .clipShape(RoundedRectangle(cornerRadius: 14, style: .continuous))
 
-                    // Legal
-                    VStack(spacing: 4) {
-                        Text("By clicking continue, you agree to our")
-                            .font(.footnote)
-                            .foregroundStyle(.secondary)
-                            .foregroundStyle(.white)
-                            .frame(maxWidth: .infinity, alignment: .center)
 
-                        HStack(spacing: 4) {
-                            Button("Terms of Service") { onOpenTOS() }
-                                .font(.footnote.weight(.semibold))
-                                .foregroundStyle(actionPurple)
-                            Text("and")
-                                .font(.footnote)
-                                .foregroundStyle(.secondary)
-                            Button("Privacy Policy") { onOpenPrivacy() }
-                                .font(.footnote.weight(.semibold))
-                                .foregroundStyle(actionPurple)
-                        }
-                    }
-                    .padding(.top, 6)
 
                     Spacer(minLength: 24)
                 }
@@ -209,7 +197,6 @@ struct LogInView: View {
             }
         }
         .navigationBarTitleDisplayMode(.inline)
-        .toolbar(.hidden, for: .navigationBar)
     }
 
     // MARK: - Actions (stub)
@@ -224,8 +211,8 @@ struct LogInView: View {
         // Connect your Google Sign-In flow here
     }
 
-    private func onGoToLogin() {
-        // Navigate to your Log In screen
+    private func onToSignUp() {
+        goToSignUp = true
     }
 
     private func onOpenTOS() {
@@ -250,3 +237,4 @@ private extension Color {
 #Preview {
     NavigationStack { LogInView() }
 }
+
