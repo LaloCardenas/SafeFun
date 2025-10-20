@@ -14,6 +14,7 @@ struct LogInView: View {
     @State private var isSecure: Bool = true
     @State private var isLoading: Bool = false
     @State private var goToSignUp: Bool = false
+    @State private var goToAppTabs: Bool = false
 
     // Action purple (adjust to your palette when you have it)
     private let actionPurple = Color(hex: 0x6C2CF4)
@@ -25,14 +26,22 @@ struct LogInView: View {
             ScrollView {
                 Spacer()
                 VStack(alignment: .leading, spacing: 20) {
-                    
-                    // Navegación programática hacia SignUpView usando NavigationStack API moderna
+
+                    // Navegación programática hacia SignUpView
                     Color.clear
                         .frame(height: 0)
                         .navigationDestination(isPresented: $goToSignUp) {
                             SignUpView()
                         }
-                    
+
+                    // Navegación programática hacia AppTabView (post-login)
+                    Color.clear
+                        .frame(height: 0)
+                        .navigationDestination(isPresented: $goToAppTabs) {
+                            AppTabView()
+                                .toolbar(.hidden, for: .navigationBar) // opcional: esconder barra en el tab
+                        }
+
                     // Title SafeFun
                     Text("SafeFun")
                         .font(.system(size: 36, weight: .bold, design: .rounded))
@@ -186,8 +195,6 @@ struct LogInView: View {
                     .frame(height: 52)
                     .clipShape(RoundedRectangle(cornerRadius: 14, style: .continuous))
 
-
-
                     Spacer(minLength: 24)
                 }
                 .padding(.horizontal, 20)
@@ -205,6 +212,8 @@ struct LogInView: View {
         defer { isLoading = false }
         // Hook up to your Auth later
         try? await Task.sleep(nanoseconds: 500_000_000)
+        // Navegar a AppTabView
+        goToAppTabs = true
     }
 
     private func onGoogle() {

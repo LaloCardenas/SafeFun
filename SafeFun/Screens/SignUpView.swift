@@ -14,6 +14,7 @@ struct SignUpView: View {
     @State private var isSecure: Bool = true
     @State private var isLoading: Bool = false
     @State private var goToLogIn: Bool = false
+    @State private var goToAppTabs: Bool = false
 
     // Debe coincidir con LogInView para coherencia visual
     private let actionPurple = Color(hex: 0x6C2CF4)
@@ -25,11 +26,20 @@ struct SignUpView: View {
             ScrollView {
                 Spacer()
                 VStack(alignment: .leading, spacing: 20) {
-                    
+
+                    // Navegación programática hacia LogInView
                     Color.clear
                         .frame(height: 0)
                         .navigationDestination(isPresented: $goToLogIn) {
                             LogInView()
+                        }
+
+                    // Navegación programática hacia AppTabView (post-signup)
+                    Color.clear
+                        .frame(height: 0)
+                        .navigationDestination(isPresented: $goToAppTabs) {
+                            AppTabView()
+                                .toolbar(.hidden, for: .navigationBar) // opcional
                         }
 
                     // Title SafeFun
@@ -185,8 +195,6 @@ struct SignUpView: View {
                     .frame(height: 52)
                     .clipShape(RoundedRectangle(cornerRadius: 14, style: .continuous))
 
-                    // Nota: Se eliminaron los avisos de Términos y Privacidad
-
                     Spacer(minLength: 24)
                 }
                 .padding(.horizontal, 20)
@@ -204,6 +212,8 @@ struct SignUpView: View {
         defer { isLoading = false }
         // Integrar con tu flujo de registro
         try? await Task.sleep(nanoseconds: 500_000_000)
+        // Navegar a AppTabView
+        goToAppTabs = true
     }
 
     private func onGoogle() {

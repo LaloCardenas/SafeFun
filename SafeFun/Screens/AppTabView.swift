@@ -11,6 +11,7 @@ private enum AppTab: Hashable {
     case communities
     case emergency
     case news
+    case profile
 }
 
 struct AppTabView: View {
@@ -35,7 +36,14 @@ struct AppTabView: View {
                     Label("News", systemImage: "newspaper.fill")
                 }
                 .tag(AppTab.news)
+            
+            ProfileView()
+                .tabItem {
+                    Label("Profile", systemImage: "person.crop.circle.fill")
+                }
+                .tag(AppTab.profile)
         }
+        .padding(.horizontal)
     }
 }
 
