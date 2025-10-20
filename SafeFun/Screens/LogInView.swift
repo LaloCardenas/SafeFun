@@ -14,7 +14,7 @@ struct LogInView: View {
     @State private var isSecure: Bool = true
     @State private var isLoading: Bool = false
 
-    // Morado de acción (ajústalo a tu paleta cuando la tengas)
+    // Action purple (adjust to your palette when you have it)
     private let actionPurple = Color(hex: 0x6C2CF4)
 
     var body: some View {
@@ -25,7 +25,7 @@ struct LogInView: View {
                 Spacer()
                 VStack(alignment: .leading, spacing: 20) {
                     
-                    // Título SafeFun
+                    // Title SafeFun
                     Text("SafeFun")
                         .font(.system(size: 36, weight: .bold, design: .rounded))
                         .foregroundStyle(.white)
@@ -33,8 +33,8 @@ struct LogInView: View {
                         .shadow(color: .black.opacity(0.25), radius: 8, x: 0, y: 6)
                         .padding(.top, 24)
                     
-                    // Subtítulo
-                    Text("Registrarse")
+                    // Subtitle
+                    Text("Sign Up")
                         .font(.system(size: 22, weight: .bold, design: .rounded))
                         .foregroundStyle(.primary)
                         .shadow(color: .black.opacity(0.25), radius: 8, x: 0, y: 6)
@@ -43,7 +43,7 @@ struct LogInView: View {
 
                     // Email
                     VStack(alignment: .leading, spacing: 8) {
-                        Text("Ingresa tu correo electrónico")
+                        Text("Enter your email")
                             .font(.subheadline)
                             .foregroundStyle(.primary.opacity(0.9))
 
@@ -63,15 +63,15 @@ struct LogInView: View {
 
                     // Password
                     VStack(alignment: .leading, spacing: 8) {
-                        Text("Ingresa una contraseña")
+                        Text("Enter a password")
                             .font(.subheadline)
                             .foregroundStyle(.primary.opacity(0.9))
 
                         Group {
                             if isSecure {
-                                SecureField("Contraseña", text: $password)
+                                SecureField("Password", text: $password)
                             } else {
-                                TextField("Contraseña", text: $password)
+                                TextField("Password", text: $password)
                             }
                         }
                         .textInputAutocapitalization(.never)
@@ -95,7 +95,7 @@ struct LogInView: View {
                         )
                     }
 
-                    // Continuar
+                    // Continue
                     Button {
                         Task { await onContinue() }
                     } label: {
@@ -107,7 +107,7 @@ struct LogInView: View {
                                 ProgressView()
                                     .tint(.white)
                             } else {
-                                Text("Continuar")
+                                Text("Continue")
                                     .foregroundStyle(.white)
                                     .font(.system(size: 18, weight: .semibold, design: .rounded))
                             }
@@ -116,14 +116,14 @@ struct LogInView: View {
                     .buttonStyle(.plain)
                     .padding(.top, 6)
 
-                    // Link a iniciar sesión
+                    // Link to log in
                     HStack(spacing: 6) {
                         Spacer()
-                        Text("¿Ya tienes cuenta?")
+                        Text("Already have an account?")
                             .foregroundStyle(.secondary)
                             .foregroundStyle(.white)
                             .font(.subheadline)
-                        Button("Iniciar sesión") {
+                        Button("Log In") {
                             onGoToLogin()
                         }
                         .font(.subheadline.weight(.semibold))
@@ -132,7 +132,7 @@ struct LogInView: View {
                     }
                     .padding(.top, 4)
 
-                    // Separador "or"
+                    // Separator "or"
                     HStack {
                         Rectangle().fill(.white.opacity(0.6)).frame(height: 1)
                         Text("or")
@@ -149,10 +149,10 @@ struct LogInView: View {
                     } label: {
                         HStack(spacing: 12) {
                             Spacer()
-                            Image(systemName: "g.circle.fill") // Reemplaza por asset del logo de Google cuando lo tengas
-                                .foregroundStyle(.red)
-                                .font(.title3)
-                            Text("Continuar con Google")
+                            Image("google_logo")
+                                .resizable()
+                                .frame(width: 15, height: 15)
+                            Text("Continue with Google")
                                 .foregroundStyle(.primary)
                                 .font(.body.weight(.semibold))
                             Spacer()
@@ -170,9 +170,9 @@ struct LogInView: View {
 
                     // Apple
                     SignInWithAppleButton(.continue) { request in
-                        // Configura tu request si usas Apple ID (name, email, scopes)
+                        // Configure your request if you use Apple ID (name, email, scopes)
                     } onCompletion: { result in
-                        // Maneja el resultado
+                        // Handle result
                     }
                     .signInWithAppleButtonStyle(.black)
                     .frame(height: 52)
@@ -204,7 +204,7 @@ struct LogInView: View {
                 }
                 .padding(.horizontal, 20)
                 .padding(.top, 24)
-                .frame(maxWidth: 600) // para iPad/landscape se ve centrado
+                .frame(maxWidth: 600) // centered for iPad/landscape
                 .frame(maxWidth: .infinity, alignment: .center)
             }
         }
@@ -216,28 +216,28 @@ struct LogInView: View {
     private func onContinue() async {
         isLoading = true
         defer { isLoading = false }
-        // Conecta con tu Auth más adelante
+        // Hook up to your Auth later
         try? await Task.sleep(nanoseconds: 500_000_000)
     }
 
     private func onGoogle() {
-        // Conecta tu flujo de Google Sign-In aquí
+        // Connect your Google Sign-In flow here
     }
 
     private func onGoToLogin() {
-        // Navega a tu pantalla de Iniciar sesión
+        // Navigate to your Log In screen
     }
 
     private func onOpenTOS() {
-        // Abre Terms of Service
+        // Open Terms of Service
     }
 
     private func onOpenPrivacy() {
-        // Abre Privacy Policy
+        // Open Privacy Policy
     }
 }
 
-// Utilidad pequeña para Color desde hex (elimina si luego usas tu paleta)
+// Small utility for Color from hex (remove later if you use your palette)
 private extension Color {
     init(hex: UInt, alpha: Double = 1.0) {
         let r = Double((hex >> 16) & 0xFF) / 255.0
