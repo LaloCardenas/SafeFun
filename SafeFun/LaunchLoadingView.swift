@@ -19,7 +19,7 @@ struct LaunchLoadingView: View {
                 
                 // 2. Your Logo
                 // !! Replace "shield.lefthalf.filled" with your logo's name: Image("AppLogo")
-                Image(systemName: "shield.lefthalf.filled")
+                Image("AppIcon")
                     .resizable()
                     .scaledToFit()
                     .frame(width: 100, height: 100)
