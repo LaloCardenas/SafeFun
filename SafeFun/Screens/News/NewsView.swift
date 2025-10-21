@@ -7,9 +7,18 @@
 
 import SwiftUI
 
-// Define el color de fondo personalizado (verde-limón)
-// --- VISTA PRINCIPAL ---
+// --- MAIN VIEW ---
 struct NewsView: View {
+
+    let mexico = MexicoCitiesView()
+    let usa = USACitiesView()
+    let canada = CanadaCitiesView()
+    
+    let columns: [GridItem] = [
+        GridItem(.flexible(), spacing: 16),
+        GridItem(.flexible(), spacing: 16)
+    ]
+    
     var body: some View {
         NavigationView {
             ZStack {
@@ -17,141 +26,144 @@ struct NewsView: View {
                 ScrollView {
                     VStack(alignment: .leading, spacing: 24) {
                         
-                        Text("Noticias")
+                        Text("News")
                             .font(.largeTitle)
                             .fontWeight(.bold)
                             .padding(.horizontal)
                         
-                        // --- BOTONES SUPERIORES ---
-                        HStack(spacing: 12) {
-                            BotonFiltro(texto: "Comunidad", icono: "person.2")
-                            BotonFiltro(texto: "Selección (País)", icono: "list.bullet")
-                            Spacer()
-                        }
-                        .padding(.horizontal)
+                        // --- MAIN BANNER ---
+                        CountdownBannerView()
                         
-                        // --- BANNER PRINCIPAL ---
-                        ZStack(alignment: .bottomLeading) {
-                            RoundedRectangle(cornerRadius: 16)
-                                .fill(Color.gray.opacity(0.3))
-                                .frame(height: 180)
-                            Text("Banner title")
-                                .font(.title).fontWeight(.bold)
-                                .foregroundColor(.black).padding(20)
-                        }
-                        .padding(.horizontal)
                         Divider()
-                        // --- SECCIÓN GRUPOS (MODIFICADA) ---
+                        
+                        // --- GROUPS SECTION ---
                         VStack(alignment: .leading, spacing: 12) {
-                            
-                            // Navega a la vista general de Grupos (GruposView)
                             NavigationLink(destination: WCGroupsListView()) {
-                                SectionHeader(titulo: "Grupos")
+                                SectionHeader(title: "Groups")
                             }
                             
                             ScrollView(.horizontal, showsIndicators: false) {
                                 HStack(spacing: 20) {
-                                    GrupoItem(letra: "A", colorFondo: .green)
-                                    GrupoItem(letra: "B", colorFondo: .red)
-                                    GrupoItem(letra: "C", colorFondo: .blue)
-                                    GrupoItem(letra: "D", colorFondo: .orange)
-                                    GrupoItem(letra: "E", colorFondo: .orange)
-                                    GrupoItem(letra: "F", colorFondo: .orange)
-                                    GrupoItem(letra: "G", colorFondo: .orange)
-                                    GrupoItem(letra: "H", colorFondo: .orange)
-                                    GrupoItem(letra: "I", colorFondo: .orange)
-                                    GrupoItem(letra: "J", colorFondo: .orange)
-                                    GrupoItem(letra: "K", colorFondo: .orange)
-                                    GrupoItem(letra: "L", colorFondo: .orange)
-                                }
-                                .padding(.horizontal)
-                            }
-                        }
-                        Divider()
-                        // --- SECCIÓN CIUDADES ---
-                        VStack(alignment: .leading, spacing: 12) {
-                            NavigationLink(destination: CiudadesView()) {
-                                SectionHeader(titulo: "EUA")
-                            }
-                            
-                            ScrollView(.horizontal, showsIndicators: false) {
-                                HStack(spacing: 16) {
-                                    NavigationLink(destination: CiudadDetailView(ciudad: "New York")) {
-                                        CiudadItem(ciudad: "New York", noticia: "Noticia 1", colorFondo: .purple)
+                                    
+                                    NavigationLink(destination: WCGroupDetailView(group: WCGroup.sampleWCGroupA)) {
+                                        GroupItem(letter: "A", image: "Group A")
                                     }
-                                    NavigationLink(destination: CiudadDetailView(ciudad: "Miami")) {
-                                        CiudadItem(ciudad: "Miami", noticia: "Noticia 1", colorFondo: .teal)
+                                    NavigationLink(destination: WCGroupDetailView(group: WCGroup.sampleWCGroupB)) {
+                                        GroupItem(letter: "B", image: "Group B")
                                     }
-                                    NavigationLink(destination: CiudadDetailView(ciudad: "San Franc")) {
-                                        CiudadItem(ciudad: "San Franc", noticia: "Noticia 1", colorFondo: .brown)
+                                    NavigationLink(destination: WCGroupDetailView(group: WCGroup.sampleWCGroupC)) {
+                                        GroupItem(letter: "C", image: "Group C")
                                     }
-                                }
-                                .padding(.horizontal)
-                            }
-                        }
-                        Divider()
-                        // --- SECCIÓN CIUDADES CANADA---
-                        VStack(alignment: .leading, spacing: 12) {
-                            NavigationLink(destination: CiudadesView()) {
-                                SectionHeader(titulo: "MEXICO")
-                            }
-                            
-                            ScrollView(.horizontal, showsIndicators: false) {
-                                HStack(spacing: 16) {
-                                    NavigationLink(destination: CiudadDetailView(ciudad: "New York")) {
-                                        CiudadItem(ciudad: "New York", noticia: "Noticia 1", colorFondo: .purple)
+                                    NavigationLink(destination: WCGroupDetailView(group: WCGroup.sampleWCGroupD)) {
+                                        GroupItem(letter: "D", image: "Group D")
                                     }
-                                    NavigationLink(destination: CiudadDetailView(ciudad: "Miami")) {
-                                        CiudadItem(ciudad: "Miami", noticia: "Noticia 1", colorFondo: .teal)
+                                    NavigationLink(destination: WCGroupDetailView(group: WCGroup.sampleWCGroupE)) {
+                                        GroupItem(letter: "E", image: "Group A")
                                     }
-                                    NavigationLink(destination: CiudadDetailView(ciudad: "San Franc")) {
-                                        CiudadItem(ciudad: "San Franc", noticia: "Noticia 1", colorFondo: .brown)
+                                    NavigationLink(destination: WCGroupDetailView(group: WCGroup.sampleWCGroupF)) {
+                                        GroupItem(letter: "F", image: "Group B")
                                     }
-                                }
-                                .padding(.horizontal)
-                            }
-                        }
-                        Divider()
-                        // --- SECCIÓN CIUDADES ---
-                        VStack(alignment: .leading, spacing: 12) {
-                            NavigationLink(destination: CiudadesView()) {
-                                SectionHeader(titulo: "CANADA")
-                            }
-                            
-                            ScrollView(.horizontal, showsIndicators: false) {
-                                HStack(spacing: 16) {
-                                    NavigationLink(destination: CiudadDetailView(ciudad: "New York")) {
-                                        CiudadItem(ciudad: "Vancouver", noticia: "Noticia 1", colorFondo: .purple)
+                                    NavigationLink(destination: WCGroupDetailView(group: WCGroup.sampleWCGroupG)) {
+                                        GroupItem(letter: "G", image: "Group C")
                                     }
-                                    NavigationLink(destination: CiudadDetailView(ciudad: "Miami")) {
-                                        CiudadItem(ciudad: "Toronto", noticia: "Noticia 1", colorFondo: .teal)
+                                    NavigationLink(destination: WCGroupDetailView(group: WCGroup.sampleWCGroupH)) {
+                                        GroupItem(letter: "H", image: "Group D")
+                                    }
+                                    NavigationLink(destination: WCGroupDetailView(group: WCGroup.sampleWCGroupI)) {
+                                        GroupItem(letter: "I", image: "Group A")
+                                    }
+                                    NavigationLink(destination: WCGroupDetailView(group: WCGroup.sampleWCGroupJ)) {
+                                        GroupItem(letter: "J", image: "Group B")
+                                    }
+                                    NavigationLink(destination: WCGroupDetailView(group: WCGroup.sampleWCGroupK)) {
+                                        GroupItem(letter: "K", image: "Group C")
+                                    }
+                                    NavigationLink(destination: WCGroupDetailView(group: WCGroup.sampleWCGroupL)) {
+                                        GroupItem(letter: "L", image: "Group D")
                                     }
                                     
-                                    .padding(.horizontal)
                                 }
+                                .padding(.horizontal)
+                            }
+                        }
+                        
+                        Divider()
+                        
+                        // --- USA CITIES SECTION ---
+                        VStack(alignment: .leading, spacing: 12) {
+                            NavigationLink(destination: CitiesView(countryName: "USA", cities: usa.usaCities)) {
+                                SectionHeader(title: "USA")
                             }
                             
+                            ScrollView(.horizontal, showsIndicators: false) {
+                                HStack(spacing: 16) {
+                                    ForEach(Array(usa.usaCities.enumerated()), id: \.element) { index, city in
+                                        NavigationLink(destination: CitiesView(countryName: "USA", cities: usa.usaCities, initialCity: city)) {
+                                            CityItem(city: city, image: city)
+                                        }
+                                    }
+                                }
+                                .padding(.horizontal)
+                            }
                         }
-                        .padding(.top)
-                        .padding(.bottom)
+                        
+                        Divider()
+                        
+                        // --- MEXICO CITIES SECTION ---
+                        VStack(alignment: .leading, spacing: 12) {
+                            NavigationLink(destination: CitiesView(countryName: "MEXICO", cities: mexico.mexicoCities)) {
+                                SectionHeader(title: "MEXICO")
+                            }
+                            
+                            ScrollView(.horizontal, showsIndicators: false) {
+                                HStack(spacing: 16) {
+                                    ForEach(Array(mexico.mexicoCities.enumerated()), id: \.element) { index, city in
+                                        NavigationLink(destination: CitiesView(countryName: "MEXICO", cities: mexico.mexicoCities, initialCity: city)) {
+                                            CityItem(city: city, image: city)
+                                        }
+                                    }
+                                }
+                                .padding(.horizontal)
+                            }
+                        }
+                        
+                        Divider()
+                        
+                        // --- CANADA CITIES SECTION ---
+                        VStack(alignment: .leading, spacing: 12) {
+                            NavigationLink(destination: CitiesView(countryName: "CANADA", cities: canada.canadaCities)) {
+                                SectionHeader(title: "CANADA")
+                            }
+                            
+                            ScrollView(.horizontal, showsIndicators: false) {
+                                HStack(spacing: 16) {
+                                    ForEach(Array(canada.canadaCities.enumerated()), id: \.element) { index, city in
+                                        NavigationLink(destination: CitiesView(countryName: "CANADA", cities: canada.canadaCities, initialCity: city)) {
+                                            CityItem(city: city, image: city)
+                                        }
+                                    }
+                                }
+                                .padding(.horizontal)
+                            }
+                        }
                     }
-                    
+                    .padding(.vertical)
                 }
-                .navigationBarHidden(true)
             }
+            .navigationBarHidden(true)
             .buttonStyle(PlainButtonStyle())
         }
     }
     
     
-    // --- VISTAS DE AYUDA (Componentes Reutilizables) ---
+    // --- HELPER VIEWS ---
     
-    struct BotonFiltro: View {
-        var texto: String
-        var icono: String
+    struct FilterButton: View {
+        var text: String
+        var icon: String
         var body: some View {
             Button(action: {}) {
-                Label(texto, systemImage: icono)
+                Label(text, systemImage: icon)
                     .font(.callout).fontWeight(.medium)
                     .foregroundColor(.black.opacity(0.8))
                     .padding(.vertical, 8).padding(.horizontal, 12)
@@ -162,10 +174,10 @@ struct NewsView: View {
     }
     
     struct SectionHeader: View {
-        var titulo: String
+        var title: String
         var body: some View {
             HStack {
-                Text(titulo).font(.title2).fontWeight(.bold)
+                Text(title).font(.title2).fontWeight(.bold)
                 Spacer()
                 Image(systemName: "chevron.right").font(.callout).foregroundColor(.gray)
             }
@@ -173,65 +185,52 @@ struct NewsView: View {
         }
     }
     
-    struct GrupoItem: View {
-        var letra: String
-        var colorFondo: Color
-        var body: some View {
-            VStack(spacing: 8) {
-                ZStack {
-                    Circle().fill(colorFondo.opacity(0.3))
-                        .frame(width: 70, height: 70)
-                }
-                Text(letra).font(.caption).fontWeight(.medium)
-            }
-        }
-    }
-    
-    struct CiudadItem: View {
-        var ciudad: String
-        var noticia: String
-        var colorFondo: Color
-        let tamanoImagen: CGFloat = 140
+    struct GroupItem: View {
+        var letter: String
+        var image: String
+        let imageSize: CGFloat = 140
+
         var body: some View {
             VStack(alignment: .leading, spacing: 4) {
                 ZStack {
-                    RoundedRectangle(cornerRadius: 10)
-                        .fill(colorFondo.opacity(0.3))
-                        .frame(width: tamanoImagen, height: tamanoImagen)
+                    Image(image)
+                        .resizable()
+                        .scaledToFill()
+                        .frame(width: imageSize, height: imageSize)
+                        .clipShape(RoundedRectangle(cornerRadius: 10))
                 }
-                Text(ciudad).font(.callout).foregroundColor(.secondary)
-                Text(noticia).font(.headline).fontWeight(.medium)
+                Text("Group \(letter)").font(.headline).fontWeight(.medium)
             }
-            .frame(width: tamanoImagen)
         }
     }
     
-    struct CiudadDetailView: View {
-        var ciudad: String
+    struct CityItem: View {
+        var city: String
+        var image: String
+        let imageSize: CGFloat = 140
+        
         var body: some View {
-            ZStack {
-                BackgroundView()
-                VStack {
-                    Text("Detalles de la noticia para")
-                        .font(.title2)
-                    Text(ciudad)
-                        .font(.largeTitle)
-                        .fontWeight(.bold)
-                    Spacer()
-                    Text("Aquí iría todo el contenido de la noticia seleccionada...")
-                        .padding()
-                    Spacer()
+            VStack(alignment: .leading, spacing: 4) {
+                ZStack {
+                    Image(image)
+                        .resizable()
+                        .scaledToFill()
+                        .frame(width: imageSize, height: imageSize)
+                        .clipShape(RoundedRectangle(cornerRadius: 10))
                 }
+                Text(city).font(.headline).fontWeight(.medium)
             }
-            .navigationTitle(ciudad)
-            .navigationBarTitleDisplayMode(.inline)
+            .frame(width: imageSize)
         }
-    }
-    
-    
-    struct NewsView_Previews: PreviewProvider {
-        static var previews: some View {
-            NewsView()
-        }
+        
     }
 }
+
+// You will need this for the preview to work
+
+struct NewsView_Previews: PreviewProvider {
+    static var previews: some View {
+        NewsView()
+    }
+}
+

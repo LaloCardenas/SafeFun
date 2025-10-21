@@ -34,7 +34,7 @@ struct BotonFiltro: View {
 }
 
 // --- Define la lista de grupos consumiendo los datos del archivo de Modelos ---
-let allWCGroups: [WCGroup] = [.sampleWCGroupA, .sampleWCGroupB]
+let allWCGroups: [WCGroup] = [.sampleWCGroupA, .sampleWCGroupB, .sampleWCGroupC, .sampleWCGroupD, .sampleWCGroupE, .sampleWCGroupF, .sampleWCGroupG, .sampleWCGroupH, .sampleWCGroupI, .sampleWCGroupJ, .sampleWCGroupK, .sampleWCGroupL]
 
 
 // --- 3. MAIN GROUPS LIST VIEW (MODIFICADA) ---
@@ -44,13 +44,17 @@ struct WCGroupsListView: View {
         ZStack {
             BackgroundView()
             VStack {
-                HStack(spacing: 12) {
-                    BotonFiltro(texto: "Comunidad", icono: "person.2")
-                    BotonFiltro(texto: "Selección (País)", icono: "list.bullet")
+                /*
+                 
+                 HStack(spacing: 12) {
+                    BotonFiltro(texto: "Comunity", icono: "person.2")
+                    BotonFiltro(texto: "Seleccion Country", icono: "list.bullet")
                     Spacer()
                 }
                 .padding(.horizontal)
                 .padding(.top)
+                 
+                 */
 
                 // --- INICIO DE LA MODIFICACIÓN ---
                 ScrollView {
@@ -77,7 +81,6 @@ struct WCGroupsListView: View {
                     .padding(.horizontal)
                     .padding(.top, 10)
                 }
-                // --- FIN DE LA MODIFICACIÓN ---
             }
         }
         .navigationTitle("Groups")
@@ -85,8 +88,6 @@ struct WCGroupsListView: View {
     }
 }
 
-
-// --- 4. GROUP DETAIL VIEW ---
 
 struct WCGroupDetailView: View {
     let group: WCGroup
@@ -103,7 +104,6 @@ struct WCGroupDetailView: View {
                         .fontWeight(.bold)
                         .padding(.horizontal)
                     
-                    // --- Tabla de Posiciones ---
                     VStack(spacing: 0) {
                         
                         HStack {

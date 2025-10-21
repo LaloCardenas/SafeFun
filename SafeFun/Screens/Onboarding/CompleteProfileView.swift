@@ -7,6 +7,7 @@
 
 import SwiftUI
 import PhotosUI
+internal import Combine
 
 // Marca global opcional: si la usas, bájala a false al terminar.
 // private let onboardingFlagKey = "needsProfileCompletion"
