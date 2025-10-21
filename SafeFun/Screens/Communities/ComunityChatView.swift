@@ -25,19 +25,30 @@ struct ChatMessage: Identifiable, Hashable {
 
 struct ComunityChatView: View {
     let community: CommunityLite
+    let isNew: Bool
+
     @Environment(\.dismiss) private var dismiss
 
-    @State private var messages: [ChatMessage] = [
-        ChatMessage(authorName: "Ana",   text: "Hi everyone 👋",                               timestamp: Date().addingTimeInterval(-3600), isCurrentUser: false),
-        ChatMessage(authorName: "Luis",  text: "Is anyone going to the fan fest today?",       timestamp: Date().addingTimeInterval(-3400), isCurrentUser: false),
-        ChatMessage(authorName: "You",   text: "I'll be there around 6pm.",                    timestamp: Date().addingTimeInterval(-3300), isCurrentUser: true),
-        ChatMessage(authorName: "Maria", text: "Great, let's meet at the main entrance 🚪",    timestamp: Date().addingTimeInterval(-3200), isCurrentUser: false),
-        ChatMessage(authorName: "You",   text: "Any parking recommendations?",                 timestamp: Date().addingTimeInterval(-3100), isCurrentUser: true),
-        ChatMessage(authorName: "Carlos",text: "Lot B is usually less crowded.",               timestamp: Date().addingTimeInterval(-3000), isCurrentUser: false)
+    // Mensajes de muestra por defecto (solo se usarán si isNew == false)
+    private static let sampleMessages: [ChatMessage] = [
+        ChatMessage(authorName: "Ana",   text: "Hi everyone 👋",                             timestamp: Date().addingTimeInterval(-3600), isCurrentUser: false),
+        ChatMessage(authorName: "Luis",  text: "Is anyone going to the fan fest today?",     timestamp: Date().addingTimeInterval(-3400), isCurrentUser: false),
+        ChatMessage(authorName: "You",   text: "I'll be there around 6pm.",                  timestamp: Date().addingTimeInterval(-3300), isCurrentUser: true),
+        ChatMessage(authorName: "Maria", text: "Great, let's meet at the main entrance 🚪",  timestamp: Date().addingTimeInterval(-3200), isCurrentUser: false),
+        ChatMessage(authorName: "You",   text: "Any parking recommendations?",               timestamp: Date().addingTimeInterval(-3100), isCurrentUser: true),
+        ChatMessage(authorName: "Carlos",text: "Lot B is usually less crowded.",             timestamp: Date().addingTimeInterval(-3000), isCurrentUser: false)
     ]
+
+    @State private var messages: [ChatMessage] = []
 
     @State private var draft: String = ""
     @FocusState private var inputFocused: Bool
+
+    init(community: CommunityLite, isNew: Bool = false) {
+        self.community = community
+        self.isNew = isNew
+        // messages se seteará en onAppear para respetar el ciclo de vida de @State
+    }
 
     var body: some View {
         ZStack {
@@ -82,10 +93,13 @@ struct ComunityChatView: View {
                 )
 
                 // Mensajes
-                ChatMessagesList(messages: messages)
-                    .onTapGesture {
-                        inputFocused = false
-                    }
+                if messages.isEmpty {
+                    EmptyChatView()
+                        .onTapGesture { inputFocused = false }
+                } else {
+                    ChatMessagesList(messages: messages)
+                        .onTapGesture { inputFocused = false }
+                }
 
                 // Input
                 ChatInputBar(
@@ -96,6 +110,12 @@ struct ComunityChatView: View {
                 .padding(.horizontal)
                 .padding(.vertical, 8)
                 .background(.ultraThinMaterial)
+            }
+        }
+        .onAppear {
+            // Si es nueva, mensajes vacíos; si no, mocks
+            if messages.isEmpty { // evitar re-asignar en reaparecer
+                messages = isNew ? [] : Self.sampleMessages
             }
         }
         .navigationBarTitleDisplayMode(.inline)
@@ -113,6 +133,24 @@ struct ComunityChatView: View {
 }
 
 // MARK: - Subvistas de Chat
+
+private struct EmptyChatView: View {
+    var body: some View {
+        VStack(spacing: 12) {
+            Image(systemName: "bubble.left.and.bubble.right")
+                .font(.system(size: 36, weight: .medium))
+                .foregroundStyle(.secondary)
+            Text("No messages yet")
+                .font(.headline)
+                .foregroundStyle(.primary)
+            Text("Start the conversation by sending the first message.")
+                .font(.subheadline)
+                .foregroundStyle(.secondary)
+        }
+        .frame(maxWidth: .infinity, maxHeight: .infinity)
+        .padding()
+    }
+}
 
 private struct ChatMessagesList: View {
     let messages: [ChatMessage]
@@ -240,7 +278,7 @@ private struct ChatInputBar: View {
 
 #Preview {
     NavigationStack {
-        ComunityChatView(community: CommunityLite(id: UUID(), name: "NYC Fans", emoji: "🗽"))
+        ComunityChatView(community: CommunityLite(id: UUID(), name: "NYC Fans", emoji: "🗽"), isNew: false)
             .preferredColorScheme(.dark)
     }
 }

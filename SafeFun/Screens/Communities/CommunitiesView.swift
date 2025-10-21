@@ -6,11 +6,16 @@
 //
 
 import SwiftUI
+import CoreImage
+import CoreImage.CIFilterBuiltins
 
 struct CommunitiesView: View {
     @State private var featured: [Community] = Community.sampleFeatured
     @State private var myCommunities: [Community] = Community.sampleMine
     @State private var showCreate: Bool = false
+
+    // Navegación directa al chat tras crear
+    @State private var navigateToCommunity: CommunityLite?
 
     var body: some View {
         NavigationStack {
@@ -20,26 +25,12 @@ struct CommunitiesView: View {
                 ScrollView(showsIndicators: false) {
                     VStack(alignment: .leading, spacing: 24) {
 
-                        // Header + Create button
+                        // Header sin botón Create
                         HStack {
                             Text("Communities")
                                 .font(.largeTitle.bold())
                                 .foregroundStyle(.primary)
                             Spacer()
-                            Button {
-                                showCreate = true
-                            } label: {
-                                HStack(spacing: 8) {
-                                    Image(systemName: "plus.circle.fill")
-                                    Text("Create")
-                                        .fontWeight(.semibold)
-                                }
-                                .padding(.horizontal, 14)
-                                .padding(.vertical, 10)
-                                .background(.ultraThinMaterial)
-                                .clipShape(Capsule())
-                            }
-                            .buttonStyle(.plain)
                         }
                         .padding(.top, 8)
                         .padding(.horizontal)
@@ -53,7 +44,8 @@ struct CommunitiesView: View {
                                 HStack(spacing: 16) {
                                     ForEach(featured) { community in
                                         NavigationLink {
-                                            ComunityChatView(community: community.toLite())
+                                            // Comunidades existentes: chat con mocks (isNew: false)
+                                            ComunityChatView(community: community.toLite(), isNew: false)
                                         } label: {
                                             FeaturedCommunityCard(community: community)
                                         }
@@ -75,7 +67,8 @@ struct CommunitiesView: View {
                                     ForEach(myCommunities) { community in
                                         VStack(spacing: 8) {
                                             NavigationLink {
-                                                ComunityChatView(community: community.toLite())
+                                                // Comunidades existentes: chat con mocks (isNew: false)
+                                                ComunityChatView(community: community.toLite(), isNew: false)
                                             } label: {
                                                 CommunityCircleAvatar(community: community)
                                             }
@@ -94,14 +87,14 @@ struct CommunitiesView: View {
                             }
                         }
 
-                        // Create block (secondary entry point)
+                        // Create block (único punto de creación)
                         VStack(alignment: .leading, spacing: 12) {
                             Text("Start your own community")
                                 .font(.headline)
                                 .foregroundStyle(.primary)
 
-                            NavigationLink {
-                                CreateCommunityView()
+                            Button {
+                                showCreate = true
                             } label: {
                                 HStack(spacing: 12) {
                                     ZStack {
@@ -146,9 +139,37 @@ struct CommunitiesView: View {
                 }
             }
             .navigationBarTitleDisplayMode(.inline)
+            // Navegación programática al chat recién creado (Opción 1: Group + EmptyView)
+            .background(
+                NavigationLink(
+                    isActive: Binding(
+                        get: { navigateToCommunity != nil },
+                        set: { isActive in
+                            if !isActive { navigateToCommunity = nil }
+                        }
+                    ),
+                    destination: {
+                        Group {
+                            if let lite = navigateToCommunity {
+                                // Nueva comunidad: chat vacío (isNew: true)
+                                ComunityChatView(community: lite, isNew: true)
+                            } else {
+                                EmptyView()
+                            }
+                        }
+                    },
+                    label: { EmptyView() }
+                )
+                .hidden()
+            )
             .sheet(isPresented: $showCreate) {
-                CreateCommunityView()
-                    .presentationDetents([.medium, .large])
+                CreateCommunityView { newCommunity in
+                    // Insertar al inicio de "My communities"
+                    myCommunities.insert(newCommunity, at: 0)
+                    // Navegar al chat vacío de la nueva comunidad
+                    navigateToCommunity = newCommunity.toLite()
+                }
+                .presentationDetents([.medium, .large])
             }
         }
     }
@@ -156,7 +177,7 @@ struct CommunitiesView: View {
 
 // MARK: - Models (mock)
 
-private struct Community: Identifiable, Hashable {
+struct Community: Identifiable, Hashable {
     let id = UUID()
     let name: String
     let emoji: String
@@ -268,38 +289,141 @@ private struct CommunityCircleAvatar: View {
     }
 }
 
-// Create view ya está en este archivo como en tu versión actual
+// Create view mejorada y simplificada (Details: solo nombre y privada)
 struct CreateCommunityView: View {
     @Environment(\.dismiss) private var dismiss
 
+    // Callback para notificar la nueva comunidad al padre
+    var onCreate: (Community) -> Void = { _ in }
+
     @State private var name: String = ""
-    @State private var emoji: String = "🎯"
     @State private var isPrivate: Bool = false
+
+    // Tags (se mantienen como pediste)
+    @State private var tagInput: String = ""
+    @State private var tags: [String] = []
+
+    // Invitación (se mantiene como pediste)
+    @State private var invitationID: UUID?
+    @State private var invitationURL: URL?
+    @State private var qrImage: Image?
+    @State private var showCopiedToast: Bool = false
+
+    private let context = CIContext()
+    private let qrFilter = CIFilter.qrCodeGenerator()
 
     var body: some View {
         NavigationStack {
             ZStack {
                 BackgroundView()
                 Form {
+                    // Solo nombre y switch privada
                     Section("Details") {
                         TextField("Community name", text: $name)
-                        TextField("Emoji", text: $emoji)
-                            .textInputAutocapitalization(.never)
-                            .autocorrectionDisabled(true)
                         Toggle("Private community", isOn: $isPrivate)
+                    }
+
+                    Section("Tags") {
+                        HStack(spacing: 8) {
+                            TextField("Add a tag (e.g. fútbol, vecinos)", text: $tagInput, onCommit: addTag)
+                                .textInputAutocapitalization(.never)
+                                .autocorrectionDisabled(true)
+                            Button("Add") { addTag() }
+                                .disabled(tagInput.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty)
+                        }
+
+                        if !tags.isEmpty {
+                            WrappingTagsView(tags: tags, onRemove: removeTag)
+                                .padding(.vertical, 4)
+                        } else {
+                            Text("No tags yet").foregroundStyle(.secondary)
+                        }
+                    }
+
+                    Section("Invitation") {
+                        if let url = invitationURL {
+                            VStack(alignment: .leading, spacing: 8) {
+                                Text("Invite link")
+                                    .font(.subheadline.weight(.semibold))
+                                HStack(spacing: 8) {
+                                    Text(url.absoluteString)
+                                        .font(.footnote)
+                                        .lineLimit(2)
+                                        .textSelection(.enabled)
+                                    Spacer()
+                                    Button {
+                                        UIPasteboard.general.string = url.absoluteString
+                                        withAnimation { showCopiedToast = true }
+                                        DispatchQueue.main.asyncAfter(deadline: .now() + 1.2) {
+                                            withAnimation { showCopiedToast = false }
+                                        }
+                                    } label: {
+                                        Image(systemName: "doc.on.doc")
+                                    }
+                                    if #available(iOS 16.0, *) {
+                                        ShareLink(item: url) {
+                                            Image(systemName: "square.and.arrow.up")
+                                        }
+                                    }
+                                }
+
+                                if let qr = qrImage {
+                                    VStack(alignment: .leading, spacing: 6) {
+                                        Text("QR code")
+                                            .font(.subheadline.weight(.semibold))
+                                        qr
+                                            .resizable()
+                                            .interpolation(.none)
+                                            .scaledToFit()
+                                            .frame(maxWidth: 220)
+                                            .padding(8)
+                                            .background(.ultraThinMaterial, in: RoundedRectangle(cornerRadius: 12, style: .continuous))
+                                    }
+                                }
+                            }
+                        } else {
+                            Button {
+                                generateInvitation()
+                            } label: {
+                                Text("Generate invitation")
+                            }
+                            .disabled(name.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty)
+                        }
                     }
 
                     Section {
                         Button {
-                            // TODO: Guardar en tu backend
+                            // Crear la comunidad y notificar al padre
+                            let new = Community(
+                                name: name.trimmingCharacters(in: .whitespacesAndNewlines),
+                                emoji: "👥", // emoji fijo para mock; puedes mapear por tags o elegir aleatorio
+                                members: 1,
+                                featured: false,
+                                color: randomCommunityColor()
+                            )
+                            onCreate(new)
                             dismiss()
                         } label: {
                             Text("Create")
                                 .frame(maxWidth: .infinity, alignment: .center)
                         }
+                        .disabled(name.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty)
                     }
                 }
                 .scrollContentBackground(.hidden)
+
+                if showCopiedToast {
+                    VStack {
+                        Spacer()
+                        Text("Link copied")
+                            .padding(.horizontal, 16)
+                            .padding(.vertical, 10)
+                            .background(.ultraThinMaterial, in: Capsule())
+                            .overlay(Capsule().strokeBorder(.white.opacity(0.12), lineWidth: 1))
+                            .padding(.bottom, 24)
+                    }
+                    .transition(.move(edge: .bottom).combined(with: .opacity))
+                }
             }
             .navigationTitle("Create community")
             .toolbar {
@@ -307,6 +431,133 @@ struct CreateCommunityView: View {
                     Button("Cancel") { dismiss() }
                 }
             }
+        }
+    }
+
+    private func addTag() {
+        let trimmed = tagInput.trimmingCharacters(in: .whitespacesAndNewlines)
+        guard !trimmed.isEmpty else { return }
+        guard !tags.contains(where: { $0.caseInsensitiveCompare(trimmed) == .orderedSame }) else {
+            tagInput = ""
+            return
+        }
+        tags.append(trimmed)
+        tagInput = ""
+    }
+
+    private func removeTag(_ tag: String) {
+        tags.removeAll { $0 == tag }
+    }
+
+    private func generateInvitation() {
+        let id = UUID()
+        invitationID = id
+        // Ajusta dominio/esquema a tu backend real
+        let url = URL(string: "https://safefun.app/join/\(id.uuidString)")!
+        invitationURL = url
+        qrImage = makeQRCode(from: url.absoluteString)
+    }
+
+    private func makeQRCode(from string: String) -> Image? {
+        let data = Data(string.utf8)
+        qrFilter.message = data
+        qrFilter.correctionLevel = "M"
+
+        guard let outputImage = qrFilter.outputImage else { return nil }
+        let transform = CGAffineTransform(scaleX: 8, y: 8)
+        let scaledImage = outputImage.transformed(by: transform)
+
+        if let cgimg = context.createCGImage(scaledImage, from: scaledImage.extent) {
+            return Image(uiImage: UIImage(cgImage: cgimg))
+        }
+        return nil
+    }
+
+    private func randomCommunityColor() -> Color {
+        // Usa tu set de colores de marca si quieres
+        let palette: [Color] = [.teal, .green, .indigo, .pink, .orange, .purple, .blue, .red]
+        return palette.randomElement() ?? .teal
+    }
+}
+
+// Vista de chips de tags con wrap
+private struct WrappingTagsView: View {
+    let tags: [String]
+    var onRemove: (String) -> Void
+
+    @State private var totalHeight = CGFloat.zero
+
+    var body: some View {
+        self.generateContent()
+            .frame(maxWidth: .infinity, alignment: .leading)
+    }
+
+    private func generateContent() -> some View {
+        var width = CGFloat.zero
+        var height = CGFloat.zero
+
+        return ZStack(alignment: .topLeading) {
+            ForEach(tags, id: \.self) { tag in
+                tagChip(tag)
+                    .padding([.horizontal, .vertical], 4)
+                    .alignmentGuide(.leading, computeValue: { d in
+                        if abs(width - d.width) > UIScreen.main.bounds.width - 64 {
+                            width = 0
+                            height -= d.height
+                        }
+                        let result = width
+                        if tag == tags.last {
+                            width = 0
+                        } else {
+                            width -= d.width
+                        }
+                        return result
+                    })
+                    .alignmentGuide(.top, computeValue: { _ in
+                        let result = height
+                        if tag == tags.last {
+                            height = 0
+                        }
+                        return result
+                    })
+            }
+        }
+        .background(viewHeightReader($totalHeight))
+    }
+
+    private func tagChip(_ text: String) -> some View {
+        HStack(spacing: 6) {
+            Text(text)
+                .font(.footnote)
+            Button {
+                onRemove(text)
+            } label: {
+                Image(systemName: "xmark.circle.fill")
+                    .font(.footnote)
+                    .foregroundStyle(.secondary)
+            }
+            .buttonStyle(.plain)
+        }
+        .padding(.horizontal, 10)
+        .padding(.vertical, 6)
+        .background(.ultraThinMaterial, in: Capsule())
+        .overlay(Capsule().strokeBorder(.white.opacity(0.12), lineWidth: 1))
+    }
+
+    private func viewHeightReader(_ binding: Binding<CGFloat>) -> some View {
+        GeometryReader { geometry in
+            Color.clear
+                .preference(key: ViewHeightKey.self, value: geometry.size.height)
+        }
+        .onPreferenceChange(ViewHeightKey.self) { height in
+            binding.wrappedValue = height
+        }
+    }
+
+    private struct ViewHeightKey: PreferenceKey {
+        static var defaultValue: CGFloat = 0
+        static func reduce(value: inout CGFloat, nextValue: () -> CGFloat) {
+            value = max(value, nextValue())
         }
     }
 }
