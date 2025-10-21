@@ -17,9 +17,8 @@ struct EmergencyView: View {
         )
     )
 
-    // Número de emergencias (placeholder para “simular” la llamada al final)
-    // Puedes cambiarlo por uno inexistente para pruebas.
-    private let simulatedCallNumber: String = "911"
+    // Número de emergencias (placeholder)
+    private let simulatedCallNumber: String = "811"
 
     // Puntos de interés hardcoded
     private let places: [EmergencyPlace] = [
@@ -54,7 +53,6 @@ struct EmergencyView: View {
     @State private var isTriggering: Bool = false
     @State private var showOverlay: Bool = false
 
-    @State private var callStatus: EmergencyActionStatus = .pending
     @State private var contactsStatus: EmergencyActionStatus = .pending
     @State private var nearbyUsersStatus: EmergencyActionStatus = .pending
     @State private var communitiesStatus: EmergencyActionStatus = .pending
@@ -100,7 +98,7 @@ struct EmergencyView: View {
                     Task { await triggerEmergencyFlow() }
                 } label: {
                     HStack(spacing: 10) {
-                        Image(systemName: "phone.fill")
+                        Image(systemName: "phone_fill") // fallback por si prefieres "phone.fill"
                             .font(.system(size: 20, weight: .bold))
                         Text("Emergency")
                             .font(.system(size: 20, weight: .bold, design: .rounded))
@@ -132,14 +130,30 @@ struct EmergencyView: View {
                         Spacer()
                     }
 
-                    // Mostramos en orden: contactos, cercanos, comunidades y finalmente llamada
+                    // Mostramos en orden: contactos, cercanos, comunidades
                     EmergencyActionRow(title: "Notifying trusted contacts", status: contactsStatus)
                     EmergencyActionRow(title: "Alerting nearby users", status: nearbyUsersStatus)
                     EmergencyActionRow(title: "Notifying your communities", status: communitiesStatus)
-                    EmergencyActionRow(title: "Opening Phone app to call", status: callStatus)
 
                     HStack {
+                        if allDone {
+                            Button {
+                                openPhoneApp(number: simulatedCallNumber)
+                            } label: {
+                                HStack(spacing: 8) {
+                                    Image(systemName: "phone.circle.fill")
+                                    Text("Call 911")
+                                }
+                                .font(.system(size: 16, weight: .semibold))
+                                .padding(.horizontal, 16)
+                                .padding(.vertical, 10)
+                                .background(.ultraThinMaterial)
+                                .clipShape(Capsule())
+                            }
+                        }
+
                         Spacer()
+
                         Button {
                             resetOverlay()
                         } label: {
@@ -164,12 +178,12 @@ struct EmergencyView: View {
         .alert("Call Simulation", isPresented: $showSimulatorAlert) {
             Button("OK", role: .cancel) { }
         } message: {
-            Text("There's no Phone app on this simulator. In a physical device, it would call \(simulatedCallNumber).")
+            Text("There's no Phone app on this simulator. On a physical device, tapping “Call 911” would call \(simulatedCallNumber).")
         }
     }
 
     private var allDone: Bool {
-        [callStatus, contactsStatus, nearbyUsersStatus, communitiesStatus].allSatisfy { $0 == .sent }
+        [contactsStatus, nearbyUsersStatus, communitiesStatus].allSatisfy { $0 == .sent }
     }
 
     // Recentrar la cámara a la región inicial
@@ -204,23 +218,17 @@ struct EmergencyView: View {
         try? await Task.sleep(nanoseconds: 800_000_000)
         communitiesStatus = .sent
 
-        // 4) Al final, abrir Teléfono y “simular” llamada
-        callStatus = .sending
-        openPhoneAppSimulated(number: simulatedCallNumber)
-        // Pequeño delay para marcar como “enviado”
-        try? await Task.sleep(nanoseconds: 600_000_000)
-        callStatus = .sent
-
+        // Listo: no hay paso de “Opening Phone app…”.
         isTriggering = false
     }
 
-    // Abrir app Teléfono con un número ficticio
-    private func openPhoneAppSimulated(number: String) {
+    // Abrir app Teléfono con un número
+    private func openPhoneApp(number: String) {
         #if targetEnvironment(simulator)
         // En simulador: mostrar un Alert en lugar de abrir Teléfono
         showSimulatorAlert = true
         #else
-        // En dispositivo: abrir Teléfono
+        // En dispositivo: abrir Teléfono cuando el usuario pulse "Call 911"
         guard let url = URL(string: "tel://\(number)") else { return }
         UIApplication.shared.open(url)
         #endif
@@ -230,7 +238,6 @@ struct EmergencyView: View {
         withAnimation {
             showOverlay = false
         }
-        callStatus = .pending
         contactsStatus = .pending
         nearbyUsersStatus = .pending
         communitiesStatus = .pending
