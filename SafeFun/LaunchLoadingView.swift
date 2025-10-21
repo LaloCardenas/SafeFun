@@ -19,11 +19,12 @@ struct LaunchLoadingView: View {
                 
                 // 2. Your Logo
                 // !! Replace "shield.lefthalf.filled" with your logo's name: Image("AppLogo")
-                Image("AppIcon")
+                Image("logo")
                     .resizable()
                     .scaledToFit()
                     .frame(width: 100, height: 100)
                     .foregroundStyle(LinearGradient(colors: [.wcPurple, .wcCyan], startPoint: .top, endPoint: .bottom))
+                    .cornerRadius(20) // <-- Adjust the radius
                     .padding(.bottom, 10)
 
                 Text("SafeFun")
