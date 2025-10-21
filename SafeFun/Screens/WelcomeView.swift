@@ -10,7 +10,8 @@ import SwiftUI
 struct WelcomeView: View {
     // Idioma seleccionado (código BCP-47)
     @State private var selectedLanguageCode: String = Locale.current.language.languageCode?.identifier ?? "en"
-
+    @State private var showCompleteProfile = false
+    @State private var goToCommunities = false
     // Lista de idiomas disponibles en el picker (sin banderas)
     private let languages: [Language] = [
         .init(code: "en", name: "English"),
@@ -177,7 +178,7 @@ struct WelcomeView: View {
             .toolbar(.hidden, for: .navigationBar)
             
             NavigationLink(
-                destination: CommunitiesView(), isActive: $goToCommunities
+                destination: AppTabView(), isActive: $goToCommunities
             ){ EmptyView()}
                 .hidden()
         }
