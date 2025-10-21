@@ -43,7 +43,6 @@ struct AppTabView: View {
                 }
                 .tag(AppTab.profile)
         }
-        .padding(.horizontal)
     }
 }
 
