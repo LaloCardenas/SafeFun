@@ -17,8 +17,9 @@ struct EmergencyView: View {
         )
     )
 
-    // Número de emergencias (cámbialo por país)
-    private let emergencyNumber: String = "911"
+    // Número de emergencias (placeholder para “simular” la llamada al final)
+    // Puedes cambiarlo por uno inexistente para pruebas.
+    private let simulatedCallNumber: String = "911"
 
     // Puntos de interés hardcoded
     private let places: [EmergencyPlace] = [
@@ -48,6 +49,18 @@ struct EmergencyView: View {
             type: .supportCenter
         )
     ]
+
+    // Estados de simulación
+    @State private var isTriggering: Bool = false
+    @State private var showOverlay: Bool = false
+
+    @State private var callStatus: EmergencyActionStatus = .pending
+    @State private var contactsStatus: EmergencyActionStatus = .pending
+    @State private var nearbyUsersStatus: EmergencyActionStatus = .pending
+    @State private var communitiesStatus: EmergencyActionStatus = .pending
+
+    // Alert para simulador
+    @State private var showSimulatorAlert: Bool = false
 
     var body: some View {
         ZStack {
@@ -84,7 +97,7 @@ struct EmergencyView: View {
 
                 // Botón de emergencia grande
                 Button {
-                    callEmergency()
+                    Task { await triggerEmergencyFlow() }
                 } label: {
                     HStack(spacing: 10) {
                         Image(systemName: "phone.fill")
@@ -95,14 +108,68 @@ struct EmergencyView: View {
                     .foregroundStyle(.white)
                     .padding(.horizontal, 22)
                     .padding(.vertical, 14)
-                    .background(Color.red)
+                    .background(isTriggering ? Color.red.opacity(0.6) : Color.red)
                     .clipShape(Capsule())
                     .shadow(color: .black.opacity(0.35), radius: 10, x: 0, y: 8)
                 }
+                .disabled(isTriggering)
                 .padding(.bottom, 24)
             }
             .padding(.horizontal)
+
+            // 3) Overlay de simulación
+            if showOverlay {
+                Color.black.opacity(0.35)
+                    .ignoresSafeArea()
+                    .transition(.opacity)
+
+                VStack(spacing: 14) {
+                    HStack(spacing: 10) {
+                        Image(systemName: "exclamationmark.triangle.fill")
+                            .foregroundStyle(.yellow)
+                        Text("Emergency in progress")
+                            .font(.headline)
+                        Spacer()
+                    }
+
+                    // Mostramos en orden: contactos, cercanos, comunidades y finalmente llamada
+                    EmergencyActionRow(title: "Notifying trusted contacts", status: contactsStatus)
+                    EmergencyActionRow(title: "Alerting nearby users", status: nearbyUsersStatus)
+                    EmergencyActionRow(title: "Notifying your communities", status: communitiesStatus)
+                    EmergencyActionRow(title: "Opening Phone app to call", status: callStatus)
+
+                    HStack {
+                        Spacer()
+                        Button {
+                            resetOverlay()
+                        } label: {
+                            Text(allDone ? "Close" : "Cancel")
+                                .font(.system(size: 16, weight: .semibold))
+                                .padding(.horizontal, 16)
+                                .padding(.vertical, 10)
+                                .background(.ultraThinMaterial)
+                                .clipShape(Capsule())
+                        }
+                    }
+                    .padding(.top, 6)
+                }
+                .padding(16)
+                .frame(maxWidth: 500)
+                .background(.thinMaterial)
+                .clipShape(RoundedRectangle(cornerRadius: 16, style: .continuous))
+                .padding(.horizontal, 20)
+                .transition(.scale)
+            }
         }
+        .alert("Call Simulation", isPresented: $showSimulatorAlert) {
+            Button("OK", role: .cancel) { }
+        } message: {
+            Text("There's no Phone app on this simulator. In a physical device, it would call \(simulatedCallNumber).")
+        }
+    }
+
+    private var allDone: Bool {
+        [callStatus, contactsStatus, nearbyUsersStatus, communitiesStatus].allSatisfy { $0 == .sent }
     }
 
     // Recentrar la cámara a la región inicial
@@ -117,14 +184,119 @@ struct EmergencyView: View {
         }
     }
 
-    // Llamada a emergencias
-    private func callEmergency() {
-        guard let url = URL(string: "tel://\(emergencyNumber)") else { return }
+    // Flujo simulado de emergencia
+    private func triggerEmergencyFlow() async {
+        isTriggering = true
+        showOverlay = true
+
+        // 1) Notificar contactos
+        contactsStatus = .sending
+        try? await Task.sleep(nanoseconds: 800_000_000)
+        contactsStatus = .sent
+
+        // 2) Notificar usuarios cercanos
+        nearbyUsersStatus = .sending
+        try? await Task.sleep(nanoseconds: 800_000_000)
+        nearbyUsersStatus = .sent
+
+        // 3) Notificar comunidades
+        communitiesStatus = .sending
+        try? await Task.sleep(nanoseconds: 800_000_000)
+        communitiesStatus = .sent
+
+        // 4) Al final, abrir Teléfono y “simular” llamada
+        callStatus = .sending
+        openPhoneAppSimulated(number: simulatedCallNumber)
+        // Pequeño delay para marcar como “enviado”
+        try? await Task.sleep(nanoseconds: 600_000_000)
+        callStatus = .sent
+
+        isTriggering = false
+    }
+
+    // Abrir app Teléfono con un número ficticio
+    private func openPhoneAppSimulated(number: String) {
+        #if targetEnvironment(simulator)
+        // En simulador: mostrar un Alert en lugar de abrir Teléfono
+        showSimulatorAlert = true
+        #else
+        // En dispositivo: abrir Teléfono
+        guard let url = URL(string: "tel://\(number)") else { return }
         UIApplication.shared.open(url)
+        #endif
+    }
+
+    private func resetOverlay() {
+        withAnimation {
+            showOverlay = false
+        }
+        callStatus = .pending
+        contactsStatus = .pending
+        nearbyUsersStatus = .pending
+        communitiesStatus = .pending
+        isTriggering = false
     }
 }
 
 // MARK: - Modelos y vistas auxiliares
+
+private enum EmergencyActionStatus: Equatable {
+    case pending
+    case sending
+    case sent
+    case failed
+}
+
+private struct EmergencyActionRow: View {
+    let title: String
+    let status: EmergencyActionStatus
+
+    var body: some View {
+        HStack(spacing: 10) {
+            statusIcon
+            Text(title)
+                .font(.subheadline)
+            Spacer()
+            statusLabel
+        }
+        .padding(10)
+        .background(Color.white.opacity(0.06))
+        .clipShape(RoundedRectangle(cornerRadius: 10, style: .continuous))
+    }
+
+    private var statusIcon: some View {
+        Group {
+            switch status {
+            case .pending:
+                Image(systemName: "clock")
+                    .foregroundStyle(.secondary)
+            case .sending:
+                ProgressView()
+                    .progressViewStyle(.circular)
+            case .sent:
+                Image(systemName: "checkmark.circle.fill")
+                    .foregroundStyle(.green)
+            case .failed:
+                Image(systemName: "xmark.octagon.fill")
+                    .foregroundStyle(.red)
+            }
+        }
+        .frame(width: 20, height: 20)
+    }
+
+    private var statusLabel: some View {
+        Text({
+            switch status {
+            case .pending: return "Pending"
+            case .sending: return "Sending…"
+            case .sent:    return "Sent"
+            case .failed:  return "Failed"
+            }
+        }())
+        .font(.caption)
+        .foregroundStyle(.secondary)
+    }
+}
 
 private struct EmergencyPlace: Identifiable {
     let id = UUID()
