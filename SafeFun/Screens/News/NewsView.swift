@@ -23,28 +23,38 @@ struct NewsView: View {
         NavigationView {
             ZStack {
                 BackgroundView()
-                ScrollView {
-                    VStack(alignment: .leading, spacing: 24) {
+                ScrollView(showsIndicators: false) {
+                    VStack(alignment: .leading, spacing: 20) {
                         
+                        // Título principal
                         Text("News")
-                            .font(.largeTitle)
-                            .fontWeight(.bold)
+                            .font(.largeTitle.bold())
+                            .foregroundStyle(.primary)
                             .padding(.horizontal)
+                            .padding(.top, 6)
                         
                         // --- MAIN BANNER ---
                         CountdownBannerView()
                         
-                        Divider()
-                        
-                        // --- GROUPS SECTION ---
-                        VStack(alignment: .leading, spacing: 12) {
-                            NavigationLink(destination: WCGroupsListView()) {
-                                SectionHeader(title: "Groups")
+                        // --- GROUPS SECTION (card) ---
+                        NewsSectionCard(title: "Groups") {
+                            // Header de navegación a lista completa
+                            NavigationLink {
+                                WCGroupsListView()
+                            } label: {
+                                HStack {
+                                    Text("See all groups")
+                                        .font(.subheadline.bold())
+                                    Spacer()
+                                    Image(systemName: "chevron.right")
+                                        .foregroundStyle(.secondary)
+                                }
+                                .padding(.vertical, 6)
                             }
+                            .buttonStyle(.plain)
                             
                             ScrollView(.horizontal, showsIndicators: false) {
-                                HStack(spacing: 20) {
-                                    
+                                HStack(spacing: 16) {
                                     NavigationLink(destination: WCGroupDetailView(group: WCGroup.sampleWCGroupA)) {
                                         GroupItem(letter: "A", image: "Group A")
                                     }
@@ -81,73 +91,96 @@ struct NewsView: View {
                                     NavigationLink(destination: WCGroupDetailView(group: WCGroup.sampleWCGroupL)) {
                                         GroupItem(letter: "L", image: "Group D")
                                     }
-                                    
                                 }
-                                .padding(.horizontal)
+                                .padding(.top, 6)
                             }
                         }
+                        .padding(.horizontal)
                         
-                        Divider()
-                        
-                        // --- USA CITIES SECTION ---
-                        VStack(alignment: .leading, spacing: 12) {
+                        // --- USA CITIES SECTION (card) ---
+                        NewsSectionCard(title: "USA") {
                             NavigationLink(destination: CitiesView(countryName: "USA", cities: usa.usaCities)) {
-                                SectionHeader(title: "USA")
+                                HStack {
+                                    Text("See all cities")
+                                        .font(.subheadline.bold())
+                                    Spacer()
+                                    Image(systemName: "chevron.right")
+                                        .foregroundStyle(.secondary)
+                                }
+                                .padding(.vertical, 6)
                             }
+                            .buttonStyle(.plain)
                             
                             ScrollView(.horizontal, showsIndicators: false) {
                                 HStack(spacing: 16) {
-                                    ForEach(Array(usa.usaCities.enumerated()), id: \.element) { index, city in
+                                    ForEach(Array(usa.usaCities.enumerated()), id: \.element) { _, city in
                                         NavigationLink(destination: CitiesView(countryName: "USA", cities: usa.usaCities, initialCity: city)) {
                                             CityItem(city: city, image: city)
                                         }
                                     }
                                 }
-                                .padding(.horizontal)
+                                .padding(.top, 6)
                             }
                         }
+                        .padding(.horizontal)
                         
-                        Divider()
-                        
-                        // --- MEXICO CITIES SECTION ---
-                        VStack(alignment: .leading, spacing: 12) {
+                        // --- MEXICO CITIES SECTION (card) ---
+                        NewsSectionCard(title: "MEXICO") {
                             NavigationLink(destination: CitiesView(countryName: "MEXICO", cities: mexico.mexicoCities)) {
-                                SectionHeader(title: "MEXICO")
+                                HStack {
+                                    Text("See all cities")
+                                        .font(.subheadline.bold())
+                                    Spacer()
+                                    Image(systemName: "chevron.right")
+                                        .foregroundStyle(.secondary)
+                                }
+                                .padding(.vertical, 6)
                             }
+                            .buttonStyle(.plain)
                             
                             ScrollView(.horizontal, showsIndicators: false) {
                                 HStack(spacing: 16) {
-                                    ForEach(Array(mexico.mexicoCities.enumerated()), id: \.element) { index, city in
+                                    ForEach(Array(mexico.mexicoCities.enumerated()), id: \.element) { _, city in
                                         NavigationLink(destination: CitiesView(countryName: "MEXICO", cities: mexico.mexicoCities, initialCity: city)) {
                                             CityItem(city: city, image: city)
                                         }
                                     }
                                 }
-                                .padding(.horizontal)
+                                .padding(.top, 6)
                             }
                         }
+                        .padding(.horizontal)
                         
-                        Divider()
-                        
-                        // --- CANADA CITIES SECTION ---
-                        VStack(alignment: .leading, spacing: 12) {
+                        // --- CANADA CITIES SECTION (card) ---
+                        NewsSectionCard(title: "CANADA") {
                             NavigationLink(destination: CitiesView(countryName: "CANADA", cities: canada.canadaCities)) {
-                                SectionHeader(title: "CANADA")
+                                HStack {
+                                    Text("See all cities")
+                                        .font(.subheadline.bold())
+                                    Spacer()
+                                    Image(systemName: "chevron.right")
+                                        .foregroundStyle(.secondary)
+                                }
+                                .padding(.vertical, 6)
                             }
+                            .buttonStyle(.plain)
                             
                             ScrollView(.horizontal, showsIndicators: false) {
                                 HStack(spacing: 16) {
-                                    ForEach(Array(canada.canadaCities.enumerated()), id: \.element) { index, city in
+                                    ForEach(Array(canada.canadaCities.enumerated()), id: \.element) { _, city in
                                         NavigationLink(destination: CitiesView(countryName: "CANADA", cities: canada.canadaCities, initialCity: city)) {
                                             CityItem(city: city, image: city)
                                         }
                                     }
                                 }
-                                .padding(.horizontal)
+                                .padding(.top, 6)
                             }
                         }
+                        .padding(.horizontal)
+                        
+                        Spacer(minLength: 8)
                     }
-                    .padding(.vertical)
+                    .padding(.vertical, 16)
                 }
             }
             .navigationBarHidden(true)
@@ -177,9 +210,10 @@ struct NewsView: View {
         var title: String
         var body: some View {
             HStack {
-                Text(title).font(.title2).fontWeight(.bold)
+                Text(title)
+                    .font(.headline)
+                    .foregroundStyle(.secondary)
                 Spacer()
-                Image(systemName: "chevron.right").font(.callout).foregroundColor(.gray)
             }
             .padding(.horizontal)
         }
@@ -191,15 +225,23 @@ struct NewsView: View {
         let imageSize: CGFloat = 140
 
         var body: some View {
-            VStack(alignment: .leading, spacing: 4) {
+            VStack(alignment: .leading, spacing: 6) {
                 ZStack {
                     Image(image)
                         .resizable()
                         .scaledToFill()
                         .frame(width: imageSize, height: imageSize)
-                        .clipShape(RoundedRectangle(cornerRadius: 10))
+                        .clipShape(RoundedRectangle(cornerRadius: 14, style: .continuous))
+                        .overlay(
+                            RoundedRectangle(cornerRadius: 14, style: .continuous)
+                                .stroke(.white.opacity(0.12), lineWidth: 1)
+                        )
+                        .shadow(radius: 8, y: 4)
                 }
-                Text("Group \(letter)").font(.headline).fontWeight(.medium)
+                Text("Group \(letter)")
+                    .font(.headline)
+                    .foregroundStyle(.primary)
+                    .fontWeight(.medium)
             }
         }
     }
@@ -210,19 +252,58 @@ struct NewsView: View {
         let imageSize: CGFloat = 140
         
         var body: some View {
-            VStack(alignment: .leading, spacing: 4) {
+            VStack(alignment: .leading, spacing: 6) {
                 ZStack {
                     Image(image)
                         .resizable()
                         .scaledToFill()
                         .frame(width: imageSize, height: imageSize)
-                        .clipShape(RoundedRectangle(cornerRadius: 10))
+                        .clipShape(RoundedRectangle(cornerRadius: 14, style: .continuous))
+                        .overlay(
+                            RoundedRectangle(cornerRadius: 14, style: .continuous)
+                                .stroke(.white.opacity(0.12), lineWidth: 1)
+                        )
+                        .shadow(radius: 8, y: 4)
                 }
-                Text(city).font(.headline).fontWeight(.medium)
+                Text(city)
+                    .font(.headline)
+                    .foregroundStyle(.primary)
+                    .fontWeight(.medium)
             }
             .frame(width: imageSize)
         }
         
+    }
+}
+
+// MARK: - Local reusable SectionCard for NewsView
+
+struct NewsSectionCard<Content: View>: View {
+    let title: String
+    let content: Content
+
+    init(title: String, @ViewBuilder content: () -> Content) {
+        self.title = title
+        self.content = content()
+    }
+
+    var body: some View {
+        VStack(alignment: .leading, spacing: 12) {
+            Text(title)
+                .font(.headline)
+                .foregroundStyle(.secondary)
+                .padding(.horizontal, 6)
+
+            VStack(spacing: 10) {
+                content
+            }
+            .padding(14)
+            .background(.ultraThinMaterial, in: RoundedRectangle(cornerRadius: 18, style: .continuous))
+            .overlay(
+                RoundedRectangle(cornerRadius: 18).stroke(.white.opacity(0.1), lineWidth: 1)
+            )
+            .shadow(radius: 12, y: 6)
+        }
     }
 }
 
@@ -231,6 +312,6 @@ struct NewsView: View {
 struct NewsView_Previews: PreviewProvider {
     static var previews: some View {
         NewsView()
+            .preferredColorScheme(.dark)
     }
 }
-

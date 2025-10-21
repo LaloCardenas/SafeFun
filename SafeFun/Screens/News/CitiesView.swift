@@ -6,11 +6,6 @@
 //
 import SwiftUI
 
-
-// --- DATA MODEL ---
-
-
-
 // --- REUSABLE CITIES VIEW ---
 
 struct CitiesView: View {
@@ -20,7 +15,7 @@ struct CitiesView: View {
     @State private var selectedCity: String
     
     var filteredNews: [NewsArticle] {
-        return NewsArticle.allNewsArticles.filter { $0.city == selectedCity }
+        NewsArticle.allNewsArticles.filter { $0.city == selectedCity }
     }
     
     init(countryName: String, cities: [String], initialCity: String? = nil) {
@@ -35,54 +30,54 @@ struct CitiesView: View {
             BackgroundView()
             VStack(alignment: .leading, spacing: 0) {
                 
-                // --- City selection scroll view ---
+                // --- City selection (compact) ---
                 ScrollViewReader { proxy in
                     ScrollView(.horizontal, showsIndicators: false) {
-                        HStack(spacing: 10) {
+                        HStack(spacing: 8) {
                             ForEach(cities, id: \.self) { city in
-                                Button(action: {
-                                    withAnimation {
-                                        selectedCity = city
-                                    }
-                                }) {
-                                    Text(city)
-                                        .font(.callout)
-                                        .fontWeight(.medium)
-                                        .padding(.vertical, 8)
-                                        .padding(.horizontal, 16)
-                                        .background(selectedCity == city ? Color.red : Color.white)
-                                        .foregroundColor(selectedCity == city ? .white : .black.opacity(0.8))
-                                        .clipShape(Capsule())
+                                CityChipCompact(
+                                    title: city,
+                                    isSelected: selectedCity == city
+                                ) {
+                                    selectedCity = city
+                                    proxy.scrollTo(city, anchor: .center)
                                 }
+                                .id(city)
                             }
                         }
-                        .padding(.horizontal)
-                        .padding(.vertical, 12)
+                        .padding(.horizontal, 10)
+                        .padding(.vertical, 6)
                     }
-                    .background(Color.white.opacity(0.5))
-                    .onAppear {
-                        proxy.scrollTo(selectedCity, anchor: .center)
-                    }
-                    .onChange(of: selectedCity) { newCity in
-                        withAnimation {
-                            proxy.scrollTo(newCity, anchor: .center)
-                        }
-                    }
-                } // End of ScrollViewReader
-                .padding(.bottom, 12)
-                
-                // --- Vertical News List ---
-                List {
-                    ForEach(filteredNews) { article in
-                        NavigationLink(destination: ArticleDetailView(article: article)) {
-                            ArticleRow(article: article)
-                        }
-                    }
-                    .listRowBackground(Color.white.opacity(0.5))
-                    .listRowSeparator(.hidden)
+                    .background(
+                        .ultraThinMaterial,
+                        in: RoundedRectangle(cornerRadius: 12, style: .continuous)
+                    )
+                    .overlay(
+                        RoundedRectangle(cornerRadius: 12, style: .continuous)
+                            .stroke(.white.opacity(0.10), lineWidth: 0.8)
+                    )
+                    .padding(.horizontal)
+                    .padding(.top, 6)
+
                 }
-                .listStyle(.plain)
-                .scrollContentBackground(.hidden)
+                .padding(.bottom, 10)
+                
+                // --- News list en estilo card coherente ---
+                ScrollView {
+                    LazyVStack(spacing: 12) {
+                        ForEach(filteredNews) { article in
+                            NavigationLink {
+                                ArticleDetailView(article: article)
+                            } label: {
+                                ArticleCardRow(article: article)
+                            }
+                            .buttonStyle(.plain)
+                            .padding(.horizontal)
+                        }
+                        Spacer(minLength: 8).frame(height: 8)
+                    }
+                    .padding(.top, 4)
+                }
             }
         }
         .navigationTitle(countryName)
@@ -90,10 +85,39 @@ struct CitiesView: View {
     }
 }
 
+// --- City chip compact (más pequeño y discreto) ---
 
-// --- REUSABLE ARTICLE ROW ---
+private struct CityChipCompact: View {
+    let title: String
+    let isSelected: Bool
+    let action: () -> Void
+    
+    var body: some View {
+        Button(action: action) {
+            HStack(spacing: 6) {
+                Text(title)
+                    .font(.footnote.weight(.semibold))
+                    .foregroundStyle(isSelected ? .white : .primary)
+                    .lineLimit(1)
+            }
+            .padding(.vertical, 6)
+            .padding(.horizontal, 10)
+            .background(
+                Capsule(style: .continuous)
+                    .fill(isSelected ? Color.wcPurple : Color.white.opacity(0.08))
+            )
+            .overlay(
+                Capsule(style: .continuous)
+                    .stroke(isSelected ? .white.opacity(0.22) : .white.opacity(0.12), lineWidth: 0.8)
+            )
+        }
+        .buttonStyle(.plain)
+    }
+}
 
-struct ArticleRow: View {
+// --- ARTICLE CARD ROW (estilo card con material) ---
+
+private struct ArticleCardRow: View {
     var article: NewsArticle
     
     var body: some View {
@@ -101,32 +125,42 @@ struct ArticleRow: View {
             Image(article.imageName)
                 .resizable()
                 .scaledToFill()
-                .frame(width: 60, height: 60)
-                .background(Color.gray.opacity(0.3))
-                .clipShape(RoundedRectangle(cornerRadius: 8))
+                .frame(width: 64, height: 64)
+                .clipShape(RoundedRectangle(cornerRadius: 10, style: .continuous))
+                .overlay(
+                    RoundedRectangle(cornerRadius: 10, style: .continuous)
+                        .stroke(.white.opacity(0.12), lineWidth: 1)
+                )
             
-            VStack(alignment: .leading, spacing: 4) {
-                HStack {
+            VStack(alignment: .leading, spacing: 6) {
+                HStack(alignment: .firstTextBaseline) {
                     Text(article.title)
-                        .font(.headline)
-                        .lineLimit(1)
+                        .font(.subheadline.weight(.semibold))
+                        .lineLimit(2)
+                        .foregroundStyle(.primary)
                     Spacer()
                     Text(article.publishDate, style: .date)
-                        .font(.caption)
-                        .foregroundColor(.secondary)
+                        .font(.caption2)
+                        .foregroundStyle(.secondary)
                 }
                 Text(article.fullText)
-                    .font(.subheadline)
-                    .foregroundColor(.secondary)
+                    .font(.footnote)
+                    .foregroundStyle(.secondary)
                     .lineLimit(2)
             }
         }
-        .padding(.vertical, 4)
+        .padding(12)
+        .background(.ultraThinMaterial, in: RoundedRectangle(cornerRadius: 14, style: .continuous))
+        .overlay(
+            RoundedRectangle(cornerRadius: 14, style: .continuous)
+                .stroke(.white.opacity(0.12), lineWidth: 1)
+        )
+        .shadow(radius: 6, y: 3)
     }
 }
 
+// --- ARTICLE DETAIL VIEW (imagen más abajo y estilo coherente) ---
 
-// --- ARTICLE DETAIL VIEW ---
 struct ArticleDetailView: View {
     let article: NewsArticle
     
@@ -136,86 +170,69 @@ struct ArticleDetailView: View {
                 .ignoresSafeArea()
             
             ScrollView {
-                
-                VStack(spacing: 0) {
+                VStack(spacing: 12) {
+                    // Margen superior más generoso para bajar la imagen
+                    Spacer(minLength: 12)
+                        .frame(height: 12)
                     
+                    // Imagen principal con overlay y esquinas continuas
                     Image(article.imageName)
                         .resizable()
                         .scaledToFill()
-                        .frame(maxWidth: .infinity, maxHeight: 250)
-                        .cornerRadius(20, corners: [.topLeft, .topRight])
+                        .frame(maxWidth: .infinity, minHeight: 210, maxHeight: 250)
+                        .clipShape(RoundedRectangle(cornerRadius: 18, style: .continuous))
+                        .overlay(
+                            RoundedRectangle(cornerRadius: 18, style: .continuous)
+                                .stroke(.white.opacity(0.15), lineWidth: 1)
+                        )
                         .padding(.horizontal)
-
-                    VStack(alignment: .leading, spacing: 12) {
-                        
+                        .padding(.top, 6)
+                    
+                    // Card de contenido
+                    VStack(alignment: .leading, spacing: 10) {
                         Text(article.title)
-                            .font(.largeTitle)
-                            .fontWeight(.bold)
-                            .padding(.top, 16)
-                            .padding(.horizontal)
-
-
+                            .font(.title3.bold())
+                            .foregroundStyle(.primary)
+                        
                         HStack {
                             Text(article.author)
-                                .font(.headline)
+                                .font(.subheadline)
+                                .foregroundStyle(.primary)
                             Spacer()
                             Text(article.publishDate, style: .date)
-                                .font(.subheadline)
-                                .foregroundColor(.secondary)
+                                .font(.caption)
+                                .foregroundStyle(.secondary)
                         }
-                        .padding(.horizontal)
-
-
-                        Divider()
-
+                        
+                        Divider().opacity(0.12)
+                        
                         Text(article.fullText)
                             .font(.body)
-                            .padding(.bottom, 20)
-                            .padding(.horizontal)
-
+                            .foregroundStyle(.primary)
                     }
-                    .frame(maxWidth: .infinity)
-                    .background(Color.white.opacity(0.7))
-                    .cornerRadius(20, corners: [.bottomLeft, .bottomRight])
+                    .padding(14)
+                    .background(.ultraThinMaterial, in: RoundedRectangle(cornerRadius: 18, style: .continuous))
+                    .overlay(
+                        RoundedRectangle(cornerRadius: 18, style: .continuous)
+                            .stroke(.white.opacity(0.12), lineWidth: 1)
+                    )
+                    .shadow(radius: 10, y: 5)
                     .padding(.horizontal)
-
-
-                    
+                    .padding(.bottom, 10)
                 }
             }
-            .ignoresSafeArea(edges: .top)
-            .padding(.top, 16)
-            
+            // Dejamos la barra de navegación visible; no ignoramos el safe area superior
         }
         .navigationTitle("")
         .navigationBarTitleDisplayMode(.inline)
     }
 }
 
-// --- EXTENSION FOR SPECIFIC CORNERS ---
-extension View {
-    func cornerRadius(_ radius: CGFloat, corners: UIRectCorner) -> some View {
-        clipShape(RoundedCorner(radius: radius, corners: corners))
-    }
-}
-
-// --- SHAPE FOR SPECIFIC CORNERS ---
-struct RoundedCorner: Shape {
-    var radius: CGFloat = .infinity
-    var corners: UIRectCorner = .allCorners
-    
-    func path(in rect: CGRect) -> Path {
-        let path = UIBezierPath(roundedRect: rect, byRoundingCorners: corners, cornerRadii: CGSize(width: radius, height: radius))
-        return Path(path.cgPath)
-    }
-}
-
 struct CitiesView_Previews: PreviewProvider {
     static var previews: some View {
         NavigationView {
-            ArticleDetailView(article: NewsArticle.allNewsArticles[0])
+            CitiesView(countryName: "USA", cities: ["Atlanta", "Boston", "Dallas", "Houston"], initialCity: "Atlanta")
+                .preferredColorScheme(.dark)
         }
     }
 }
-
-
