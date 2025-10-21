@@ -53,7 +53,7 @@ struct CommunitiesView: View {
                                 HStack(spacing: 16) {
                                     ForEach(featured) { community in
                                         NavigationLink {
-                                            CommunityDetailPlaceholder(community: community)
+                                            ComunityChatView(community: community.toLite())
                                         } label: {
                                             FeaturedCommunityCard(community: community)
                                         }
@@ -75,7 +75,7 @@ struct CommunitiesView: View {
                                     ForEach(myCommunities) { community in
                                         VStack(spacing: 8) {
                                             NavigationLink {
-                                                CommunityDetailPlaceholder(community: community)
+                                                ComunityChatView(community: community.toLite())
                                             } label: {
                                                 CommunityCircleAvatar(community: community)
                                             }
@@ -163,6 +163,10 @@ private struct Community: Identifiable, Hashable {
     let members: Int
     let featured: Bool
     let color: Color
+
+    func toLite() -> CommunityLite {
+        CommunityLite(id: id, name: name, emoji: emoji)
+    }
 
     static let sampleFeatured: [Community] = [
         .init(name: "NYC Fans", emoji: "🗽", members: 1280, featured: true, color: .purple),
@@ -264,28 +268,7 @@ private struct CommunityCircleAvatar: View {
     }
 }
 
-// Placeholder de detalle
-private struct CommunityDetailPlaceholder: View {
-    let community: Community
-    var body: some View {
-        ZStack {
-            BackgroundView()
-            VStack(spacing: 12) {
-                Text(community.emoji).font(.system(size: 60))
-                Text(community.name).font(.title.bold())
-                Text("\(community.members) members")
-                    .foregroundStyle(.secondary)
-                Spacer()
-            }
-            .padding()
-        }
-        .navigationTitle(community.name)
-        .navigationBarTitleDisplayMode(.inline)
-    }
-}
-
-// MARK: - Create Community (placeholder)
-
+// Create view ya está en este archivo como en tu versión actual
 struct CreateCommunityView: View {
     @Environment(\.dismiss) private var dismiss
 
