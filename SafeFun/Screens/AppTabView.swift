@@ -7,9 +7,42 @@
 
 import SwiftUI
 
+private enum AppTab: Hashable {
+    case communities
+    case emergency
+    case news
+    case profile
+}
+
 struct AppTabView: View {
+    @State private var selectedTab: AppTab = .communities
+
     var body: some View {
-        Text(/*@START_MENU_TOKEN@*/"Hello, World!"/*@END_MENU_TOKEN@*/)
+        TabView(selection: $selectedTab) {
+            CommunitiesView()
+                .tabItem {
+                    Label("Communities", systemImage: "person.3.fill")
+                }
+                .tag(AppTab.communities)
+
+            EmergencyView()
+                .tabItem {
+                    Label("Emergency", systemImage: "exclamationmark.triangle.fill")
+                }
+                .tag(AppTab.emergency)
+
+            NewsView()
+                .tabItem {
+                    Label("News", systemImage: "newspaper.fill")
+                }
+                .tag(AppTab.news)
+            
+            ProfileView()
+                .tabItem {
+                    Label("Profile", systemImage: "person.crop.circle.fill")
+                }
+                .tag(AppTab.profile)
+        }
     }
 }
 
