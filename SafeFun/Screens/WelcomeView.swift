@@ -8,23 +8,62 @@
 import SwiftUI
 
 struct WelcomeView: View {
-    @State private var selectedCountry: String = "United States"
-    @State private var showCompleteProfile = false
-    @State private var goToCommunities = false
+    // Idioma seleccionado (código BCP-47)
+    @State private var selectedLanguageCode: String = Locale.current.language.languageCode?.identifier ?? "en"
 
+    // Lista de idiomas disponibles en el picker (sin banderas)
+    private let languages: [Language] = [
+        .init(code: "en", name: "English"),
+        .init(code: "es", name: "Español"),
+        .init(code: "fr", name: "Français"),
+        .init(code: "de", name: "Deutsch"),
+        .init(code: "pt", name: "Português"),
+        .init(code: "ja", name: "日本語")
+    ]
 
-    // Country list storing the display name and its flag emoji
-    private let countries: [(name: String, flag: String)] = [
-        ("United States", "🇺🇸"),
-        ("Mexico", "🇲🇽"),
-        ("Canada", "🇨🇦"),
-        ("Argentina", "🇦🇷"),
-        ("Brazil", "🇧🇷"),
-        ("United Kingdom", "🇬🇧"),
-        ("Spain", "🇪🇸"),
-        ("France", "🇫🇷"),
-        ("Germany", "🇩🇪"),
-        ("Japan", "🇯🇵")
+    // Diccionario local de traducciones solo para esta vista
+    // Claves: id lógico del texto. Valores: traducciones por código de idioma.
+    private let translations: [String: [String: String]] = [
+        "title": [
+            "en": "Welcome to SafeFun!",
+            "es": "¡Bienvenido a SafeFun!",
+            "fr": "Bienvenue sur SafeFun !",
+            "de": "Willkommen bei SafeFun!",
+            "pt": "Bem-vindo ao SafeFun!",
+            "ja": "SafeFunへようこそ！"
+        ],
+        "subtitle": [
+            "en": "Your security network throughout the FIFA World Cup 2026",
+            "es": "Tu red de seguridad durante la Copa Mundial de la FIFA 2026",
+            "fr": "Votre réseau de sécurité pendant la Coupe du Monde de la FIFA 2026",
+            "de": "Ihr Sicherheitsnetz während der FIFA-Weltmeisterschaft 2026",
+            "pt": "Sua rede de segurança durante a Copa do Mundo da FIFA 2026",
+            "ja": "FIFAワールドカップ2026の期間中、あなたのセキュリティネットワーク"
+        ],
+        "languageLabel": [
+            "en": "Language",
+            "es": "Idioma",
+            "fr": "Langue",
+            "de": "Sprache",
+            "pt": "Idioma",
+            "ja": "言語"
+        ],
+        "signUp": [
+            "en": "Sign Up",
+            "es": "Crear cuenta",
+            "fr": "Créer un compte",
+            "de": "Registrieren",
+            "pt": "Criar conta",
+            "ja": "新規登録"
+        ],
+        "logIn": [
+            "en": "Log In",
+            "es": "Iniciar sesión",
+            "fr": "Se connecter",
+            "de": "Anmelden",
+            "pt": "Entrar",
+            "ja": "ログイン"
+        ]
     ]
 
     var body: some View {
@@ -35,13 +74,13 @@ struct WelcomeView: View {
                     Spacer()
                     // Section 1: Title and subtitle
                     VStack(spacing: 16) {
-                        Text("Welcome to SafeFun!")
+                        Text(t("title"))
                             .font(.system(size: 64, weight: .bold, design: .rounded))
                             .foregroundStyle(.white)
                             .shadow(color: .black.opacity(0.25), radius: 8, x: 0, y: 6)
                             .multilineTextAlignment(.center)
-                        
-                        Text("Your security network throughout the FIFA World Cup 2026")
+
+                        Text(t("subtitle"))
                             .font(.system(size: 22, weight: .semibold, design: .rounded))
                             .foregroundStyle(.white.opacity(0.9))
                             .multilineTextAlignment(.center)
@@ -51,24 +90,35 @@ struct WelcomeView: View {
                     .padding(.top, 24)
                     
                     Spacer(minLength: 24)
-                    
-                    // Section 2: Country picker
+
+                    // Section 2: Language picker (sin banderas)
                     VStack(spacing: 12) {
                         HStack(spacing: 12) {
-                            Picker(selection: $selectedCountry) {
-                                ForEach(countries, id: \.name) { item in
-                                    HStack { Text(item.flag) }.tag(item.name)
+                            // Etiqueta “Idioma”
+                            VStack(alignment: .leading, spacing: 2) {
+                                Text(t("languageLabel"))
+                                    .font(.caption)
+                                    .foregroundStyle(.white.opacity(0.8))
+                                // Nombre del idioma seleccionado
+                                Text(nameForSelectedLanguage)
+                                    .font(.system(size: 24))
+                                    .foregroundStyle(.white)
+                            }
+
+                            Spacer()
+
+                            // Picker simple con nombres de idioma
+                            Picker(selection: $selectedLanguageCode) {
+                                ForEach(languages, id: \.code) { lang in
+                                    Text(lang.name)
+                                        .tag(lang.code)
                                 }
                             } label: {
-                                Text(flagForSelectedCountry)
+                                Text(nameForSelectedLanguage)
                             }
                             .pickerStyle(.menu)
                             .tint(.white)
                             .foregroundStyle(.white)
-                            
-                            Text(selectedCountry)
-                                .font(.system(size: 24))
-                                .foregroundStyle(.white)
                         }
                         .padding(.horizontal, 16)
                         .padding(.vertical, 12)
@@ -92,7 +142,7 @@ struct WelcomeView: View {
                                 showCompleteProfile = true
                             }
                         } label: {
-                            Text("Sign Up")
+                            Text(t("signUp"))
                                 .font(.system(size: 20, weight: .bold, design: .rounded))
                                 .frame(maxWidth: .infinity)
                                 .padding(.vertical, 14)
@@ -108,7 +158,7 @@ struct WelcomeView: View {
                                 showCompleteProfile = true
                             }
                         } label: {
-                            Text("Log In")
+                            Text(t("logIn"))
                                 .font(.system(size: 20, weight: .semibold, design: .rounded))
                                 .frame(maxWidth: .infinity)
                                 .padding(.vertical, 12)
@@ -141,10 +191,26 @@ struct WelcomeView: View {
             }).interactiveDismissDisabled(true)
         }
     }
-    // MARK: - Derived
-    private var flagForSelectedCountry: String {
-        countries.first(where: { $0.name == selectedCountry })?.flag ?? "🏳️"
+
+    // MARK: - Derived helpers
+
+    private func t(_ key: String) -> String {
+        // Obtiene traducción según idioma seleccionado; fallback a inglés o clave
+        translations[key]?[selectedLanguageCode]
+        ?? translations[key]?["en"]
+        ?? key
     }
+
+    private var nameForSelectedLanguage: String {
+        languages.first(where: { $0.code == selectedLanguageCode })?.name
+        ?? "English"
+    }
+}
+
+// Modelo simple de idioma (sin bandera)
+private struct Language: Hashable {
+    let code: String   // "en", "es", "fr", ...
+    let name: String   // "English", "Español", ...
 }
 
 #Preview {
