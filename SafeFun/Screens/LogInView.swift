@@ -14,7 +14,11 @@ struct LogInView: View {
     @State private var isSecure: Bool = true
     @State private var isLoading: Bool = false
     @State private var goToSignUp: Bool = false
-    @State private var goToAppTabs: Bool = false
+
+    let onContinue: () -> Void
+    init(onContinue: @escaping () -> Void = {}) {
+            self.onContinue = onContinue
+        }
 
     // Action purple (adjust to your palette when you have it)
     private let actionPurple = Color(hex: 0x6C2CF4)
@@ -34,14 +38,6 @@ struct LogInView: View {
                             SignUpView()
                         }
 
-                    // Navegación programática hacia AppTabView (post-login)
-                    Color.clear
-                        .frame(height: 0)
-                        .navigationDestination(isPresented: $goToAppTabs) {
-                            AppTabView()
-                                .toolbar(.hidden, for: .navigationBar) // opcional: esconder barra en el tab
-                        }
-
                     // Title SafeFun
                     Text("SafeFun")
                         .font(.system(size: 36, weight: .bold, design: .rounded))
@@ -49,7 +45,7 @@ struct LogInView: View {
                         .frame(maxWidth: .infinity, alignment: .center)
                         .shadow(color: .black.opacity(0.25), radius: 8, x: 0, y: 6)
                         .padding(.top, 24)
-                    
+
                     // Subtitle
                     Text("Login")
                         .font(.system(size: 22, weight: .bold, design: .rounded))
@@ -114,15 +110,14 @@ struct LogInView: View {
 
                     // Continue
                     Button {
-                        Task { await onContinue() }
+                        handleContinueTapped()
                     } label: {
                         ZStack {
                             RoundedRectangle(cornerRadius: 14, style: .continuous)
                                 .fill(actionPurple)
                                 .frame(height: 52)
                             if isLoading {
-                                ProgressView()
-                                    .tint(.white)
+                                ProgressView().tint(.white)
                             } else {
                                 Text("Continue")
                                     .foregroundStyle(.white)
@@ -138,7 +133,6 @@ struct LogInView: View {
                         Spacer()
                         Text("Don't have an account?")
                             .foregroundStyle(.secondary)
-                            .foregroundStyle(.white)
                             .font(.subheadline)
                         Button("Sign Up") {
                             onToSignUp()
@@ -206,14 +200,16 @@ struct LogInView: View {
         .navigationBarTitleDisplayMode(.inline)
     }
 
-    // MARK: - Actions (stub)
-    private func onContinue() async {
+    // MARK: - Actions
+
+    private func handleContinueTapped() {
+        guard !isLoading else { return }
+        // Spiner de carga
         isLoading = true
-        defer { isLoading = false }
-        // Hook up to your Auth later
-        try? await Task.sleep(nanoseconds: 500_000_000)
-        // Navegar a AppTabView
-        goToAppTabs = true
+        DispatchQueue.main.asyncAfter(deadline: .now() + 0.3) {
+            isLoading = false
+            onContinue()
+        }
     }
 
     private func onGoogle() {
@@ -244,6 +240,5 @@ private extension Color {
 }
 
 #Preview {
-    NavigationStack { LogInView() }
+    NavigationStack { LogInView(onContinue: {}) }
 }
-

@@ -9,12 +9,14 @@ import SwiftUI
 import AuthenticationServices
 
 struct SignUpView: View {
+    
+    var onContinue: () -> Void = {}   // valor por defecto para no romper previews
+
     @State private var email: String = ""
     @State private var password: String = ""
     @State private var isSecure: Bool = true
     @State private var isLoading: Bool = false
     @State private var goToLogIn: Bool = false
-    @State private var goToAppTabs: Bool = false
 
     // Debe coincidir con LogInView para coherencia visual
     private let actionPurple = Color(hex: 0x6C2CF4)
@@ -32,14 +34,6 @@ struct SignUpView: View {
                         .frame(height: 0)
                         .navigationDestination(isPresented: $goToLogIn) {
                             LogInView()
-                        }
-
-                    // Navegación programática hacia AppTabView (post-signup)
-                    Color.clear
-                        .frame(height: 0)
-                        .navigationDestination(isPresented: $goToAppTabs) {
-                            AppTabView()
-                                .toolbar(.hidden, for: .navigationBar) // opcional
                         }
 
                     // Title SafeFun
@@ -114,15 +108,14 @@ struct SignUpView: View {
 
                     // Create account
                     Button {
-                        Task { await onCreateAccount() }
+                        handleCreateAccount()
                     } label: {
                         ZStack {
                             RoundedRectangle(cornerRadius: 14, style: .continuous)
                                 .fill(actionPurple)
                                 .frame(height: 52)
                             if isLoading {
-                                ProgressView()
-                                    .tint(.white)
+                                ProgressView().tint(.white)
                             } else {
                                 Text("Create account")
                                     .foregroundStyle(.white)
@@ -138,7 +131,6 @@ struct SignUpView: View {
                         Spacer()
                         Text("Already have an account?")
                             .foregroundStyle(.secondary)
-                            .foregroundStyle(.white)
                             .font(.subheadline)
                         Button("Log In") {
                             onToLogIn()
@@ -206,14 +198,15 @@ struct SignUpView: View {
         .navigationBarTitleDisplayMode(.inline)
     }
 
-    // MARK: - Actions (stub)
-    private func onCreateAccount() async {
+    // MARK: - Actions
+
+    private func handleCreateAccount() {
+        guard !isLoading else { return }
         isLoading = true
-        defer { isLoading = false }
-        // Integrar con tu flujo de registro
-        try? await Task.sleep(nanoseconds: 500_000_000)
-        // Navegar a AppTabView
-        goToAppTabs = true
+        DispatchQueue.main.asyncAfter(deadline: .now() + 0.3) {
+            isLoading = false
+            onContinue()
+        }
     }
 
     private func onGoogle() {
@@ -236,6 +229,6 @@ private extension Color {
 }
 
 #Preview {
-    NavigationStack { SignUpView() }
+    NavigationStack { SignUpView(onContinue: {}) }
 }
 
