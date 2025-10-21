@@ -70,7 +70,6 @@ struct WelcomeView: View {
         NavigationStack {
             ZStack {
                 BackgroundView() // reusable background
-                // Main container
                 VStack {
                     Spacer()
                     // Section 1: Title and subtitle
@@ -89,8 +88,7 @@ struct WelcomeView: View {
                     }
                     .frame(maxWidth: 700)
                     .padding(.top, 24)
-
-                    // Space between section 1 and 2
+                    
                     Spacer(minLength: 24)
 
                     // Section 2: Language picker (sin banderas)
@@ -133,15 +131,16 @@ struct WelcomeView: View {
                         .shadow(color: .black.opacity(0.2), radius: 8, x: 0, y: 6)
                     }
                     .frame(maxWidth: 700)
-
-                    // Space between section 2 and 3
+                    
                     Spacer(minLength: 36)
-
+                    
                     // Section 3: Buttons
                     VStack(spacing: 14) {
                         // Primary button: Sign Up
                         NavigationLink {
-                            SignUpView()
+                            SignUpView {
+                                showCompleteProfile = true
+                            }
                         } label: {
                             Text(t("signUp"))
                                 .font(.system(size: 20, weight: .bold, design: .rounded))
@@ -152,10 +151,12 @@ struct WelcomeView: View {
                                 .clipShape(RoundedRectangle(cornerRadius: 14, style: .continuous))
                         }
                         .shadow(color: .black.opacity(0.25), radius: 10, x: 0, y: 8)
-
+                        
                         // Secondary button: Log In
                         NavigationLink {
-                            LogInView()
+                            LogInView {
+                                showCompleteProfile = true
+                            }
                         } label: {
                             Text(t("logIn"))
                                 .font(.system(size: 20, weight: .semibold, design: .rounded))
@@ -168,13 +169,26 @@ struct WelcomeView: View {
                         .shadow(color: .black.opacity(0.25), radius: 10, x: 0, y: 8)
                     }
                     .frame(maxWidth: 700)
-
-                    // Bottom spacing
+                    
                     Spacer(minLength: 24)
                 }
                 .padding(.horizontal)
             }
-            .navigationBarHidden(true)
+            .toolbar(.hidden, for: .navigationBar)
+            
+            NavigationLink(
+                destination: CommunitiesView(), isActive: $goToCommunities
+            ){ EmptyView()}
+                .hidden()
+        }
+        .sheet(isPresented: $showCompleteProfile) {
+            CompleteProfileView(onFinish: {
+                showCompleteProfile = false
+                
+                DispatchQueue.main.asyncAfter(deadline: .now() + 0.2) {
+                    goToCommunities = true
+                }
+            }).interactiveDismissDisabled(true)
         }
     }
 
