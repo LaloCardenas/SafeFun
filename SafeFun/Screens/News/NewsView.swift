@@ -20,7 +20,7 @@ struct NewsView: View {
     ]
     
     var body: some View {
-        NavigationView {
+        NavigationStack{
             ZStack {
                 BackgroundView()
                 ScrollView(showsIndicators: false) {

@@ -27,10 +27,6 @@ struct LaunchLoadingView: View {
                     .cornerRadius(20) // <-- Adjust the radius
                     .padding(.bottom, 10)
 
-                Text("SafeFun")
-                    .font(.title.bold())
-                    .foregroundStyle(.primary)
-
                 ProgressView(value: launchManager.progress)                    .progressViewStyle(LinearProgressViewStyle(tint: .wcCyan))
                     .scaleEffect(y: 2, anchor: .center) // Make the bar thicker
                     .clipShape(Capsule()) // Round the bar's ends

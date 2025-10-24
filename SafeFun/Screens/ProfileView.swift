@@ -104,16 +104,23 @@ private struct ProfileHeaderCard: View {
             }
 
             // Stats / badges
-            HStack(spacing: 12) {
-                StatPill(icon: "person.3.fill",       value: "8",  label: "Groups",   equalHeight: pillsEqualHeight)
-                StatPill(icon: "mappin.and.ellipse",  value: "3",  label: "Cities",   equalHeight: pillsEqualHeight)
-                StatPill(icon: "bell.fill",           value: "12", label: "Alerts",   equalHeight: pillsEqualHeight)
+            GeometryReader { proxy in
+                HStack(spacing: 12) {
+                    StatPill(icon: "person.3.fill", value: "8", label: "Groups", equalHeight: pillsEqualHeight)
+                        .frame(width: (proxy.size.width - 24) / 3) // 3 columnas, restando espaciado total
+                    StatPill(icon: "mappin.and.ellipse", value: "3", label: "Cities", equalHeight: pillsEqualHeight)
+                        .frame(width: (proxy.size.width - 24) / 3)
+                    StatPill(icon: "bell.fill", value: "12", label: "Alerts", equalHeight: pillsEqualHeight)
+                        .frame(width: (proxy.size.width - 24) / 3)
+                }
+                .onPreferenceChange(PillMaxHeightKey.self) { maxH in
+                    pillsEqualHeight = maxH
+                }
+                .frame(maxWidth: .infinity)
             }
-            .onPreferenceChange(PillMaxHeightKey.self) { maxH in
-                pillsEqualHeight = maxH
-            }
-            .frame(maxWidth: .infinity)
-            .fixedSize(horizontal: false, vertical: true)
+            .frame(height: pillsEqualHeight)
+            .padding(.horizontal)
+
         }
         .padding(30)
         .background(.ultraThinMaterial, in: RoundedRectangle(cornerRadius: 24, style: .continuous))
