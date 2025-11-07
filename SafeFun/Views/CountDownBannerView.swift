@@ -35,21 +35,18 @@ struct CountdownBannerView: View {
     
     var body: some View {
         ZStack {
-            // Background Image
-            Image("stadium-banner") // Make sure you have an image named "stadium-banner" in your assets
+            Image("stadium-banner")
                 .resizable()
                 .scaledToFill()
                 .frame(height: 180)
-                .overlay(Color.black.opacity(0.4)) // Dark overlay for text readability
+                .overlay(Color.black.opacity(0.4))
 
-            // Countdown Content
             VStack(spacing: 8) {
                 Text("Countdown to Kickoff")
                     .font(.title2)
                     .fontWeight(.bold)
                     .foregroundColor(.white)
                 
-                // HStack for the numbers
                 HStack(spacing: 20) {
                     timeComponent(value: timeRemaining.days, label: "DAYS")
                     timeComponent(value: timeRemaining.hours, label: "HRS")
@@ -62,12 +59,10 @@ struct CountdownBannerView: View {
         .clipShape(RoundedRectangle(cornerRadius: 16))
         .padding(.horizontal)
         .onReceive(timer) { _ in
-            // 4. Update the time remaining every second
             updateTimeRemaining()
         }
     }
     
-    // Helper view for each number (Days, Hours, etc.)
     private func timeComponent(value: Int, label: String) -> some View {
         VStack {
             Text(String(format: "%02d", value))
@@ -81,7 +76,6 @@ struct CountdownBannerView: View {
         }
     }
     
-    // Function to calculate the time difference
     private func updateTimeRemaining() {
         let calendar = Calendar.current
         let components = calendar.dateComponents([.day, .hour, .minute, .second], from: Date(), to: targetDate)
