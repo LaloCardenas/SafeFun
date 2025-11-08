@@ -15,7 +15,7 @@ struct SafeFunApp: App {
         WindowGroup {
             if launchManager.isLoading {
                 LaunchLoadingView()
-                    .environmentObject(launchManager) // <-- ADD THIS MODIFIER
+                    .environmentObject(launchManager) 
             } else {
                 RootView()
             }

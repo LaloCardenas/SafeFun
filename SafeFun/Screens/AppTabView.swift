@@ -15,7 +15,7 @@ private enum AppTab: Hashable {
 }
 
 struct AppTabView: View {
-    @State private var selectedTab: AppTab = .communities
+    @State private var selectedTab: AppTab = .emergency
 
     var body: some View {
         TabView(selection: $selectedTab) {

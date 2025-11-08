@@ -50,17 +50,15 @@ struct ComunityChatView: View {
     init(community: CommunityLite, isNew: Bool = false) {
         self.community = community
         self.isNew = isNew
-        // messages se seteará en onAppear para respetar el ciclo de vida de @State
     }
 
     var body: some View {
         ZStack {
-            // Asumimos que BackgroundView() y Color.wcPurple están definidos en otra parte de tu proyecto
+
             BackgroundView()
                 .ignoresSafeArea()
 
             VStack(spacing: 0) {
-                // Header con botón de Back, emoji y nombre
                 HStack(spacing: 10) {
                     Button {
                         dismiss()
@@ -116,14 +114,13 @@ struct ComunityChatView: View {
                 .background(.ultraThinMaterial)
             }
             // --- AÑADIDO --- El modificador de alerta que se disparará
-            .alert("Mensaje no enviado", isPresented: $showingProfanityAlert) {
+            .alert("Message not sent", isPresented: $showingProfanityAlert) {
                 Button("OK", role: .cancel) { }
             } message: {
-                Text("Tu mensaje contiene lenguaje inapropiado y no se puede enviar.")
+                Text("Your message couldn't sent, because it contains inappropiate content.")
             }
         }
         .onAppear {
-            // Si es nueva, mensajes vacíos; si no, mocks
             if messages.isEmpty { // evitar re-asignar en reaparecer
                 messages = isNew ? [] : Self.sampleMessages
             }
@@ -132,21 +129,19 @@ struct ComunityChatView: View {
         .toolbar(.hidden, for: .navigationBar)
     }
 
-    // --- MODIFICADO --- Lógica de filtro añadida a sendMessage
+    // Lógica de filtro añadida a sendMessage
     private func sendMessage() {
         let trimmed = draft.trimmingCharacters(in: .whitespacesAndNewlines)
         guard !trimmed.isEmpty else { return }
 
-        // 1. Llama a la función 'containsProfanity' (definida en tu otro archivo)
         if isMessageObscene(text: trimmed) {
             
-            // 2. Si es profano, no lo envíes y activa la alerta
+            // Si es profano, no se envía y activa la alerta
             showingProfanityAlert = true
-            // Nota: No limpiamos el 'draft' para que el usuario pueda editarlo
             
         } else {
             
-            // 3. Si es seguro, envíalo (comportamiento original)
+            // happy path, enviarlo
             withAnimation(.easeInOut) {
                 messages.append(ChatMessage(authorName: "You", text: trimmed, timestamp: Date(), isCurrentUser: true))
                 draft = ""

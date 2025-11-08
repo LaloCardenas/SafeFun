@@ -7,49 +7,117 @@
 
 import SwiftUI
 import MapKit
+import CoreLocation
 
 struct EmergencyView: View {
-    // Región inicial (CDMX como ejemplo)
-    @State private var cameraPosition: MapCameraPosition = .region(
-        MKCoordinateRegion(
-            center: CLLocationCoordinate2D(latitude: 19.432608, longitude: -99.133209),
-            span: MKCoordinateSpan(latitudeDelta: 0.12, longitudeDelta: 0.12)
-        )
+    
+    // Gestor de ubicación
+    @StateObject private var locationManager = LocationManager()
+
+    // Región por defecto (Lomas/Polanco)
+    private var defaultRegion: MKCoordinateRegion = MKCoordinateRegion(
+        center: CLLocationCoordinate2D(latitude: 19.422, longitude: -99.208),
+        span: MKCoordinateSpan(latitudeDelta: 0.03, longitudeDelta: 0.03)
     )
 
-    // Número de emergencias (placeholder)
+    @State private var cameraPosition: MapCameraPosition
+    
+    @State private var hasCenteredOnUser: Bool = false
+    
+    // Estados para la selección y la ruta
+    @State private var selectedPlace: EmergencyPlace?
+    @State private var route: MKRoute?
+    
+    // Inicializador
+    init() {
+        _cameraPosition = State(initialValue: .region(defaultRegion))
+    }
+
     private let simulatedCallNumber: String = "811"
 
-    // Puntos de interés hardcoded
     private let places: [EmergencyPlace] = [
         EmergencyPlace(
-            name: "Hospital General",
-            coordinate: CLLocationCoordinate2D(latitude: 19.4273, longitude: -99.1546),
-            type: .hospital
-        ),
-        EmergencyPlace(
-            name: "Clínica de Atención",
-            coordinate: CLLocationCoordinate2D(latitude: 19.4405, longitude: -99.1350),
-            type: .clinic
-        ),
-        EmergencyPlace(
-            name: "Oficina de Policía",
-            coordinate: CLLocationCoordinate2D(latitude: 19.4280, longitude: -99.1210),
-            type: .police
-        ),
-        EmergencyPlace(
-            name: "Zona Segura",
-            coordinate: CLLocationCoordinate2D(latitude: 19.4202, longitude: -99.1337),
+            name: "Social Point, Public Park",
+            coordinate: CLLocationCoordinate2D(latitude: 19.412137923774363, longitude: -99.1691600083961),
             type: .safeZone
         ),
         EmergencyPlace(
-            name: "Centro de Apoyo a Extranjeros",
-            coordinate: CLLocationCoordinate2D(latitude: 19.4370, longitude: -99.1450),
+            name: "Estación de Policía (Lomas)",
+            coordinate: CLLocationCoordinate2D(latitude: 19.4188, longitude: -99.2065),
+            type: .police
+        ),
+        EmergencyPlace(
+            name: "USA Embassy",
+            coordinate: CLLocationCoordinate2D(latitude: 19.43299737282861, longitude: -99.16628878905449),
+            type: .supportCenter // Usamos 'supportCenter' para embajadas
+        ),
+        EmergencyPlace(
+            name: "Canadian Embassy",
+            coordinate: CLLocationCoordinate2D(latitude: 19.43074713845559, longitude: -99.18561839223563),
             type: .supportCenter
+        ),
+        EmergencyPlace(
+            name: "Hospital",
+            coordinate: CLLocationCoordinate2D(latitude: 19.29731795246796, longitude: -99.16138535531489),
+            type: .clinic
+        ),
+        EmergencyPlace(
+            name: "Hospital",
+            coordinate: CLLocationCoordinate2D(latitude: 19.416887007762636, longitude: -99.15208366685509),
+            type: .clinic
+        ),
+        EmergencyPlace(
+            name: "Estadio Banorte",
+            coordinate: CLLocationCoordinate2D(latitude: 19.303175586428882, longitude: -99.15036466240505),
+            type: .safeZone
+        ),
+        EmergencyPlace(
+            name: "Police Department (Centro Histórico)",
+            coordinate: CLLocationCoordinate2D(latitude: 19.4330, longitude: -99.1332),
+            type: .police
+        ),
+        EmergencyPlace(
+            name: "Hospital General de México",
+            coordinate: CLLocationCoordinate2D(latitude: 19.4085, longitude: -99.1550),
+            type: .hospital
+        ),
+        EmergencyPlace(
+            name: "Support Center to Forgeineers(Coyoacán)",
+            coordinate: CLLocationCoordinate2D(latitude: 19.3498, longitude: -99.1622),
+            type: .supportCenter
+        ),
+        EmergencyPlace(
+            name: "Safe Spot (Rectoría UNAM)",
+            coordinate: CLLocationCoordinate2D(latitude: 19.3325, longitude: -99.1890),
+            type: .safeZone
+        ),
+        EmergencyPlace(
+            name: "Clinic (Santa Fe)",
+            coordinate: CLLocationCoordinate2D(latitude: 19.3630, longitude: -99.2735),
+            type: .clinic
+        ),
+        EmergencyPlace(
+            name: "Airport T2 (Support Center for Travelers)",
+            coordinate: CLLocationCoordinate2D(latitude: 19.4390, longitude: -99.0800),
+            type: .supportCenter
+        ),
+        EmergencyPlace(
+            name: "Hospital ABC (Observatorio)",
+            coordinate: CLLocationCoordinate2D(latitude: 19.3975, longitude: -99.2040),
+            type: .hospital
+        ),
+        EmergencyPlace(
+            name: "Police Station (Polanco)",
+            coordinate: CLLocationCoordinate2D(latitude: 19.4310, longitude: -99.1920),
+            type: .police
+        ),
+        EmergencyPlace(
+            name: "Clinic (Condesa)",
+            coordinate: CLLocationCoordinate2D(latitude: 19.4145, longitude: -99.1685),
+            type: .clinic
         )
     ]
 
-    // Estados de simulación
     @State private var isTriggering: Bool = false
     @State private var showOverlay: Bool = false
 
@@ -62,47 +130,68 @@ struct EmergencyView: View {
 
     var body: some View {
         ZStack {
-            // 1) Mapa como fondo
             Map(position: $cameraPosition) {
+                
+                // Punto azul del usuario
+                UserAnnotation()
+                
+                if let route {
+                    MapPolyline(route.polyline)
+                        .stroke(.blue.opacity(0.8), lineWidth: 6)
+                }
+                
                 ForEach(places) { place in
                     Annotation(place.name, coordinate: place.coordinate) {
+                        
                         PlaceAnnotationView(place: place)
+                            .onTapGesture {
+                                if place == selectedPlace {
+                                    selectedPlace = nil
+                                    route = nil
+                                } else {
+                                    selectedPlace = place
+                                }
+                            }
+                            .scaleEffect(selectedPlace == place ? 1.2 : 1.0)
+                            .shadow(radius: selectedPlace == place ? 10 : 0)
+                            .animation(.spring(), value: selectedPlace)
                     }
                 }
             }
             .mapStyle(.standard(elevation: .realistic))
             .ignoresSafeArea()
 
-            // 2) Controles flotantes
             VStack {
-                // Botón de recenter arriba a la derecha
                 HStack {
                     Spacer()
-                    Button {
-                        recenter()
-                    } label: {
-                        Image(systemName: "location.circle.fill")
-                            .font(.system(size: 28))
-                            .foregroundStyle(.white)
-                            .padding(10)
-                            .background(.black.opacity(0.35))
-                            .clipShape(Circle())
+                    VStack(spacing: 12) {
+                        
+                        Button {
+                            recenter()
+                        } label: {
+                            Image(systemName: "location.circle.fill")
+                                .font(.system(size: 28))
+                                .foregroundStyle(.white)
+                                .padding(10)
+                                .background(.black.opacity(0.35))
+                                .clipShape(Circle())
+                        }
+                            
                     }
                     .padding(.trailing, 16)
-                    .padding(.top, 16)
                 }
+                
                 Spacer()
 
-                // Botón de emergencia grande
                 Button {
                     Task { await triggerEmergencyFlow() }
                 } label: {
                     HStack(spacing: 10) {
-                        Image(systemName: "phone_fill") // fallback por si prefieres "phone.fill"
-                            .font(.system(size: 20, weight: .bold))
+                        Image(systemName: "phone_fill")
                         Text("Emergency")
                             .font(.system(size: 20, weight: .bold, design: .rounded))
                     }
+                    .font(.system(size: 20, weight: .bold))
                     .foregroundStyle(.white)
                     .padding(.horizontal, 22)
                     .padding(.vertical, 14)
@@ -114,8 +203,9 @@ struct EmergencyView: View {
                 .padding(.bottom, 24)
             }
             .padding(.horizontal)
+            .padding(.top)
 
-            // 3) Overlay de simulación
+            
             if showOverlay {
                 Color.black.opacity(0.35)
                     .ignoresSafeArea()
@@ -130,7 +220,6 @@ struct EmergencyView: View {
                         Spacer()
                     }
 
-                    // Mostramos en orden: contactos, cercanos, comunidades
                     EmergencyActionRow(title: "Notifying trusted contacts", status: contactsStatus)
                     EmergencyActionRow(title: "Alerting nearby users", status: nearbyUsersStatus)
                     EmergencyActionRow(title: "Notifying your communities", status: communitiesStatus)
@@ -180,55 +269,125 @@ struct EmergencyView: View {
         } message: {
             Text("There's no Phone app on this simulator. On a physical device, tapping “Call 911” would call \(simulatedCallNumber).")
         }
+        .onAppear {
+            locationManager.requestLocation()
+        }
+        .onChange(of: locationManager.userLocation) {
+            guard let location = locationManager.userLocation, !hasCenteredOnUser else { return }
+            
+            let userRegion = MKCoordinateRegion(
+                center: location.coordinate,
+                span: MKCoordinateSpan(latitudeDelta: 0.05, longitudeDelta: 0.05)
+            )
+            
+            withAnimation {
+                cameraPosition = .region(userRegion)
+            }
+            hasCenteredOnUser = true
+        }
+        .onChange(of: selectedPlace) {
+            if let place = selectedPlace {
+                calculateRoute(to: place)
+            } else {
+                // Si se des-selecciona, borra la ruta
+                route = nil
+            }
+        }
     }
 
     private var allDone: Bool {
         [contactsStatus, nearbyUsersStatus, communitiesStatus].allSatisfy { $0 == .sent }
     }
 
-    // Recentrar la cámara a la región inicial
+    // Centra el mapa en el usuario (si hay permiso) o en la región default
     private func recenter() {
+        // Primero, vemos si tenemos la ubicación del usuario
+        guard let userCoordinate = locationManager.userLocation?.coordinate else {
+            // Si no la tenemos (permiso denegado, etc.), centramos default
+            withAnimation {
+                cameraPosition = .region(defaultRegion)
+            }
+            return
+        }
+        
+        // Si SÍ la tenemos, creamos una región centrada en el usuario
+        let userRegion = MKCoordinateRegion(
+            center: userCoordinate,
+            span: MKCoordinateSpan(latitudeDelta: 0.05, longitudeDelta: 0.05) // Un zoom más cercano
+        )
+        
         withAnimation {
-            cameraPosition = .region(
-                MKCoordinateRegion(
-                    center: CLLocationCoordinate2D(latitude: 19.432608, longitude: -99.133209),
-                    span: MKCoordinateSpan(latitudeDelta: 0.12, longitudeDelta: 0.12)
-                )
-            )
+            cameraPosition = .region(userRegion)
         }
     }
+
+    // función para calcular la ruta
+    private func calculateRoute(to destination: EmergencyPlace) {
+        
+        // Verificamos el permiso. Si no hay, no hacemos nada.
+        guard locationManager.isAuthorized else {
+            print("No hay permiso de ubicación para calcular la ruta.")
+            selectedPlace = nil
+            return
+        }
+        
+        guard let userCoordinate = locationManager.userLocation?.coordinate else {
+            print("No se ha podido obtener la ubicación actual.")
+            selectedPlace = nil
+            return
+        }
+        
+        // Borramos la ruta anterior antes de calcular la nueva
+        route = nil
+
+        // puntos de inicio y fin
+        let sourceItem = MKMapItem(placemark: MKPlacemark(coordinate: userCoordinate))
+        let destItem = MKMapItem(placemark: MKPlacemark(coordinate: destination.coordinate))
+
+        let request = MKDirections.Request()
+        request.source = sourceItem
+        request.destination = destItem
+        request.transportType = .automobile
+        
+        let directions = MKDirections(request: request)
+        directions.calculate { response, error in
+            if let error = error {
+                print("Error al calcular la ruta: \(error.localizedDescription)")
+                return
+            }
+            
+            if let firstRoute = response?.routes.first {
+                self.route = firstRoute
+            }
+        }
+    }
+
 
     // Flujo simulado de emergencia
     private func triggerEmergencyFlow() async {
         isTriggering = true
         showOverlay = true
 
-        // 1) Notificar contactos
         contactsStatus = .sending
         try? await Task.sleep(nanoseconds: 800_000_000)
         contactsStatus = .sent
 
-        // 2) Notificar usuarios cercanos
         nearbyUsersStatus = .sending
         try? await Task.sleep(nanoseconds: 800_000_000)
         nearbyUsersStatus = .sent
 
-        // 3) Notificar comunidades
         communitiesStatus = .sending
         try? await Task.sleep(nanoseconds: 800_000_000)
         communitiesStatus = .sent
 
-        // Listo: no hay paso de “Opening Phone app…”.
         isTriggering = false
     }
 
     // Abrir app Teléfono con un número
     private func openPhoneApp(number: String) {
         #if targetEnvironment(simulator)
-        // En simulador: mostrar un Alert en lugar de abrir Teléfono
         showSimulatorAlert = true
         #else
-        // En dispositivo: abrir Teléfono cuando el usuario pulse "Call 911"
         guard let url = URL(string: "tel://\(number)") else { return }
         UIApplication.shared.open(url)
         #endif
@@ -305,11 +464,16 @@ private struct EmergencyActionRow: View {
     }
 }
 
-private struct EmergencyPlace: Identifiable {
+// Hacemos el struct 'Equatable' para poder compararlos
+private struct EmergencyPlace: Identifiable, Equatable {
     let id = UUID()
     let name: String
     let coordinate: CLLocationCoordinate2D
     let type: PlaceType
+    
+    static func == (lhs: EmergencyPlace, rhs: EmergencyPlace) -> Bool {
+        lhs.id == rhs.id
+    }
 }
 
 private enum PlaceType {
