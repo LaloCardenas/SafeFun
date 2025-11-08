@@ -104,7 +104,6 @@ struct CompleteProfileView: View {
                     .padding(.top, 16)
                     .padding(.bottom, 16)
                     
-                    // Botones (Estáticos al final del scroll)
                     VStack(spacing: 10) {
                         Button {
                             Task { await finish(onSkip: true) }
@@ -128,7 +127,7 @@ struct CompleteProfileView: View {
                             .padding(.vertical, 12)
                         }
                         .buttonStyle(.borderedProminent)
-                        .tint(.wcPurple) // Asumimos que este color existe
+                        .tint(.wcPurple)
                         .clipShape(RoundedRectangle(cornerRadius: 14, style: .continuous))
                         .disabled(!vm.canContinue || vm.isSaving)
                         .opacity(vm.canContinue ? 1 : 0.6)
@@ -136,12 +135,11 @@ struct CompleteProfileView: View {
                     .padding(.horizontal)
                     .padding(.vertical, 16)
                     .background(.ultraThinMaterial, in: Rectangle())
-                } // <-- Fin del ScrollView
+                }
                 
-            } // <-- Fin de VStack(spacing: 0)
+            }
         }
-        // --- ¡CAMBIO AQUÍ! ---
-        // Esto le dice a SwiftUI que NO anime los cambios de foco.
+
         .animation(nil, value: focused)
         // --- FIN DEL CAMBIO ---
         .toolbar {

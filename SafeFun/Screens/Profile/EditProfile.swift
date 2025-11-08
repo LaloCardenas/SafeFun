@@ -10,38 +10,27 @@ import PhotosUI
 
 struct EditProfileView: View {
     
-    // 1. @Binding: Conexión directa a los datos de ProfileView
     @Binding var user: User
     
-    // 2. Variables locales para el picker de fotos (si quieres añadirlo)
     @State private var avatar: Image? = nil
     @State private var photoItem: PhotosPickerItem? = nil
     
-    // 3. Variable para cerrar la pantalla
     @Environment(\.dismiss) var dismiss
     
-    // 4. Copia de respaldo para "Cancelar"
-    // Guardamos el estado original por si el usuario cancela
     @State private var originalUser: User
 
     init(user: Binding<User>) {
         self._user = user
-        // Guardamos la copia original al iniciar la vista
         self._originalUser = State(initialValue: user.wrappedValue)
     }
 
     var body: some View {
-        // Usamos NavigationView para la barra superior con botones
         NavigationView {
             ZStack {
-                BackgroundView() // Asumimos que este View existe
+                BackgroundView()
 
                 ScrollView(showsIndicators: false) {
                     VStack(spacing: 16) {
-                        
-                        // NOTA: El AvatarPicker no está aquí,
-                        // pero se podría añadir si lo deseas,
-                        // siguiendo el mismo patrón de @Binding
                         
                         SectionCard(title: "Basic information") {
                             GlassField(systemIcon: "person.fill", placeholder: "First Name", text: $user.firstName)
@@ -55,8 +44,6 @@ struct EditProfileView: View {
 
                         // --- NUEVA SECCIÓN DINÁMICA ---
                         SectionCard(title: "Emergency Contacts") {
-                            // 1. Iteramos sobre el Binding ($user.emergencyContacts)
-                            // Esto hace que los TextFields sean editables
                             ForEach($user.emergencyContacts) { $contact in
                                 VStack {
                                     GlassField(systemIcon: "person.text.rectangle", placeholder: "Contact Name", text: $contact.name)
@@ -64,10 +51,8 @@ struct EditProfileView: View {
                                 }
                                 .padding(.bottom, 5)
                             }
-                            // 2. Añadimos el modificador para borrar
                             .onDelete(perform: deleteContact)
                             
-                            // 3. Botón para añadir nuevos contactos
                             Button(action: addContact) {
                                 Label("Add Contact", systemImage: "plus.circle.fill")
                                     .font(.callout.bold())
@@ -78,7 +63,6 @@ struct EditProfileView: View {
                             }
                             .buttonStyle(.plain)
                         }
-                        // --- FIN DE LA NUEVA SECCIÓN ---
 
                     }
                     .padding(.horizontal)
@@ -89,19 +73,14 @@ struct EditProfileView: View {
             .navigationTitle("Edit Profile")
             .navigationBarTitleDisplayMode(.inline)
             .toolbar {
-                // Botón para "Cancelar"
                 ToolbarItem(placement: .cancellationAction) {
                     Button("Cancel") {
-                        // Revertimos los cambios al estado original
                         user = originalUser
                         dismiss()
                     }
                 }
-                // Botón para "Guardar"
                 ToolbarItem(placement: .confirmationAction) {
                     Button("Save") {
-                        // Los datos ya se actualizaron gracias a @Binding.
-                        // Simplemente cerramos la pantalla.
                         dismiss()
                     }
                 }
@@ -262,9 +241,7 @@ private struct TeamPicker: View {
             lastName: "Larios",
             username: "heclarios",
             team: "USA",
-            emergencyContacts: [
-                EmergencyContact(name: "Jonathan Larios", phone: "5511223344")
-            ]
+            emergencyContacts: []
         )
     ))
     .preferredColorScheme(.dark)

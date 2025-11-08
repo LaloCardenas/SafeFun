@@ -3,8 +3,6 @@
 //  SafeFun
 //
 //  Created by Lalo Cardenas on 20/10/25.
-//  Modified by Hector Larios at 20-10-25 11:17
-//  Modified by ChatGPT (Amezcua requests) - Verification modal, nav flows, settings screens
 //
 
 import SwiftUI
@@ -13,30 +11,29 @@ import UIKit
 
 struct ProfileView: View {
     
-    // 1. LA "FUENTE DE LA VERDAD"
+    
     @State private var user = User(
         firstName: "Héctor",
         lastName: "Larios",
         username: "heclarios",
-        team: "USA",
+        team: "United States",
         emergencyContacts: [
-            EmergencyContact(name: "Mamá", phone: "5512345678"),
-            EmergencyContact(name: "Hermano", phone: "5587654321")
+            EmergencyContact(name: "Mom", phone: "1312345678"),
+            EmergencyContact(name: "Dad", phone: "1287654321")
         ]
     )
     
-    // Sheets / navigation state
     @State private var isShowingEditSheet = false
     @State private var showVerificationModal = false
     
-    // Preference / other screens
     @State private var showNotificationsScreen = false
     @State private var showPrivacyScreen = false
     @State private var showCommunitiesScreen = false
     @State private var showTermsScreen = false
     
-    // Keep existing simulator alert state
     @State private var showSimulatorAlert = false
+    @State private var showWelcomeView = false
+
     
     var body: some View {
         ZStack {
@@ -46,10 +43,6 @@ struct ProfileView: View {
                 VStack(spacing: 20) {
                     
                     ProfileHeaderCard(user: user)
-                    
-                    QuickActionsRow(onEditTapped: {
-                        isShowingEditSheet = true
-                    })
                     
                     // MARK: - Account
                     ProfileSection(
@@ -77,19 +70,24 @@ struct ProfileView: View {
                         }
                     )
                     
-                    // MARK: - Emergency Contacts (leave as is)
                     if !user.emergencyContacts.isEmpty {
                         ProfileSection(
                             title: "Emergency Contacts",
                             rows: user.emergencyContacts.map {
                                 .init(icon: "phone.fill", title: "\($0.name): \($0.phone)")
                             },
-                            onRowTapped: { _ in
-                                // Open edit profile to allow editing contacts
-                                isShowingEditSheet = true
+                            onRowTapped: { tappedTitle in
+                                if let phone = tappedTitle.split(separator: ":").last?
+                                    .trimmingCharacters(in: .whitespacesAndNewlines) {
+                                    makePhoneCall(to: phone)
+                                }
                             }
                         )
                     }
+
+
+
+
                     
                     // MARK: - Preferences
                     ProfileSection(
@@ -125,7 +123,9 @@ struct ProfileView: View {
                         }
                     )
                     
-                    SignOutButton()
+                    SignOutButton{
+                        showWelcomeView = true
+                    }
                         .padding(.top, 4)
                 }
                 .padding(.vertical, 24)
@@ -160,22 +160,6 @@ struct ProfileView: View {
                                 .clipShape(RoundedRectangle(cornerRadius: 12, style: .continuous))
                         }
                         
-                        Button {
-                            withAnimation(.spring()) {
-                                showVerificationModal = false
-                            }
-                            DispatchQueue.main.asyncAfter(deadline: .now() + 0.15) {
-                                showCommunitiesScreen = true
-                            }
-                        } label: {
-                            Text("Go to Communities")
-                                .bold()
-                                .frame(maxWidth: .infinity)
-                                .padding(.vertical, 12)
-                                .background(LinearGradient(colors: [.wcGold, .wcPurple], startPoint: .leading, endPoint: .trailing))
-                                .foregroundStyle(.black)
-                                .clipShape(RoundedRectangle(cornerRadius: 12, style: .continuous))
-                        }
                     }
                     .padding(.horizontal)
                 }
@@ -205,12 +189,16 @@ struct ProfileView: View {
         } message: {
             Text("There's no Phone app on this simulator. On a physical device, tapping “Call 911” would call 811.")
         }
+        
+        .fullScreenCover(isPresented: $showWelcomeView) {
+            NavigationStack {
+                WelcomeView()
+                    .navigationBarBackButtonHidden(true)
+            }
+        }
+        
     }
 }
-
-//
-// Resto de las subviews (ajustadas y nuevas vistas añadidas)
-//
 
 private struct ProfileHeaderCard: View {
     var user: User
@@ -253,12 +241,10 @@ private struct ProfileHeaderCard: View {
 
             GeometryReader { proxy in
                 HStack(spacing: 12) {
-                    StatPill(icon: "person.3.fill", value: "8", label: "Groups", equalHeight: pillsEqualHeight)
-                        .frame(width: (proxy.size.width - 12) / 3)
                     StatPill(icon: "flag.fill", value: user.team, label: "Team", equalHeight: pillsEqualHeight)
-                        .frame(width: (proxy.size.width - 12) / 3)
+                        .frame(width: (proxy.size.width - 32) / 2)
                     StatPill(icon: "bell.fill", value: "2", label: "Alerts", equalHeight: pillsEqualHeight)
-                        .frame(width: (proxy.size.width - 12) / 3)
+                        .frame(width: (proxy.size.width - 40) / 2)
                 }
                 .onPreferenceChange(PillMaxHeightKey.self) { maxH in
                     pillsEqualHeight = maxH
@@ -273,27 +259,6 @@ private struct ProfileHeaderCard: View {
         .overlay(RoundedRectangle(cornerRadius: 24).strokeBorder(.white.opacity(0.15), lineWidth: 1))
         .shadow(radius: 20, y: 8)
         .accessibilityElement(children: .contain)
-    }
-}
-
-private struct QuickActionsRow: View {
-    var onEditTapped: () -> Void = {}
-    var onEmergencyTapped: () -> Void = {}
-    var onPrivacyTapped: () -> Void = {}
-    var onSettingsTapped: () -> Void = {}
-
-    var body: some View {
-        HStack(spacing: 12) {
-            QuickActionButton(icon: "pencil.line", title: "Edit", action: onEditTapped)
-            QuickActionButton(icon: "phone.fill", title: "Emergency", action: onEmergencyTapped)
-            QuickActionButton(icon: "hand.raised.fill", title: "Privacy", action: onPrivacyTapped)
-            QuickActionButton(icon: "gearshape.fill", title: "Settings", action: onSettingsTapped)
-        }
-        .frame(maxWidth: .infinity, alignment: .center)
-        .padding(14)
-        .background(.ultraThinMaterial, in: RoundedRectangle(cornerRadius: 20, style: .continuous))
-        .overlay(RoundedRectangle(cornerRadius: 20).strokeBorder(.white.opacity(0.12), lineWidth: 1))
-        .shadow(radius: 16, y: 6)
     }
 }
 
@@ -354,10 +319,10 @@ private struct ProfileSection: View {
 }
 
 private struct SignOutButton: View {
+    var action: () -> Void
+    
     var body: some View {
-        Button {
-            // TODO: sign out action
-        } label: {
+        Button(action: action) {
             HStack(spacing: 10) {
                 Image(systemName: "rectangle.portrait.and.arrow.right.fill")
                 Text("Sign out").bold()
@@ -410,36 +375,45 @@ private struct StatPill: View {
     let equalHeight: CGFloat?
 
     var body: some View {
-        let base = ViewThatFits(in: .horizontal) {
-            HStack(spacing: 8) {
-                Image(systemName: icon).font(.callout).accessibilityHidden(true)
-                Text(value).font(.callout).fontWeight(.semibold).monospacedDigit().lineLimit(1)
-                Text(label).font(.callout).foregroundStyle(.secondary).lineLimit(1).minimumScaleFactor(0.9).allowsTightening(true)
-            }
-            .padding(.vertical, 8).padding(.horizontal, 12)
-            .background(.ultraThinMaterial, in: Capsule())
-            .overlay(Capsule().stroke(.white.opacity(0.2), lineWidth: 1))
+        VStack(spacing: 4) {
+            // TOP valor
+            Text(value)
+                .font(.title3)
+                .fontWeight(.semibold)
+                .monospacedDigit()
+                .lineLimit(1)
+                .minimumScaleFactor(0.9)
+                .multilineTextAlignment(.center)
 
-            VStack(spacing: 4) {
-                HStack(spacing: 6) {
-                    Image(systemName: icon).font(.callout).accessibilityHidden(true)
-                    Text(value).font(.callout).fontWeight(.semibold).monospacedDigit().lineLimit(1)
-                }
-                Text(label).font(.callout).foregroundStyle(.secondary).multilineTextAlignment(.center).lineLimit(2).fixedSize(horizontal: false, vertical: true)
+            //  BOTTOM texto
+            HStack(spacing: 6) {
+                Image(systemName: icon)
+                    .font(.callout)
+                    .accessibilityHidden(true)
+                Text(label)
+                    .font(.callout)
+                    .foregroundStyle(.secondary)
+                    .lineLimit(1)
+                    .minimumScaleFactor(0.9)
+                    .allowsTightening(true)
             }
-            .padding(.vertical, 8).padding(.horizontal, 12)
-            .background(.ultraThinMaterial, in: Capsule())
-            .overlay(Capsule().stroke(.white.opacity(0.2), lineWidth: 1))
+            .frame(maxWidth: .infinity, alignment: .center)
         }
-
-        base
-            .background(GeometryReader { proxy in Color.clear.preference(key: PillMaxHeightKey.self, value: proxy.size.height) })
-            .frame(height: equalHeight)
-            .contentShape(Rectangle())
-            .accessibilityElement(children: .combine)
-            .accessibilityLabel("\(label): \(value)")
+        .padding(.vertical, 8)
+        .padding(.horizontal, 12)
+        .background(.ultraThinMaterial, in: Capsule())
+        .overlay(Capsule().stroke(.white.opacity(0.2), lineWidth: 1))
+        .background(
+            GeometryReader { proxy in
+                Color.clear.preference(key: PillMaxHeightKey.self, value: proxy.size.height)
+            }
+        )
+        .contentShape(Rectangle())
+        .accessibilityElement(children: .combine)
+        .accessibilityLabel("\(label): \(value)")
     }
 }
+
 
 #Preview {
     NavigationStack {
@@ -448,7 +422,6 @@ private struct StatPill: View {
     }
 }
 
-// ---------- Verification alert view (already present, left mostly the same) ----------
 private struct VerificationAlertView: View {
     var body: some View {
         HStack(spacing: 12) {
@@ -457,10 +430,10 @@ private struct VerificationAlertView: View {
                 .foregroundStyle(.green)
 
             VStack(alignment: .leading, spacing: 2) {
-                Text("Cuenta Verificada")
+                Text("Account Verified")
                     .font(.headline)
                     .foregroundStyle(.primary)
-                Text("Ya puedes acceder a todas las comunidades.")
+                Text("You can now access all the functionalities of the communities.")
                     .font(.callout)
                     .foregroundStyle(.secondary)
             }
@@ -473,16 +446,13 @@ private struct VerificationAlertView: View {
     }
 }
 
-// ---------- NEW: Notifications settings screen ----------
 struct NotificationsSettingsView: View {
     @Environment(\.dismiss) private var dismiss
-    // Communities toggles
     @State private var messages = true
     @State private var invitations = true
     @State private var newMembers = true
     @State private var meetingUpdates = true
 
-    // News toggles
     @State private var liveResults = true
     @State private var localNews = true
     @State private var selectedCity = "Mexico City"
@@ -520,7 +490,6 @@ struct NotificationsSettingsView: View {
     }
 }
 
-// ---------- NEW: Privacy view ----------
 struct PrivacyView: View {
     @Environment(\.dismiss) private var dismiss
     @State private var phoneAvailable: Bool = UIApplication.shared.canOpenURL(URL(string: "tel://")!)
@@ -562,7 +531,6 @@ struct PrivacyView: View {
                 }
             }
             .onAppear {
-                // refresh status
                 locationStatus = CLLocationManager().authorizationStatus
                 phoneAvailable = UIApplication.shared.canOpenURL(URL(string: "tel://")!)
             }
@@ -581,7 +549,17 @@ struct PrivacyView: View {
     }
 }
 
-// ---------- NEW: Terms / Security view ----------
+private func callNumber(_ number: String) {
+    let cleaned = number
+        .replacingOccurrences(of: " ", with: "")
+        .replacingOccurrences(of: "-", with: "")
+    
+    if let url = URL(string: "tel://\(cleaned)"),
+       UIApplication.shared.canOpenURL(url) {
+        UIApplication.shared.open(url)
+    }
+}
+
 struct TermsView: View {
     @Environment(\.dismiss) private var dismiss
 
@@ -621,5 +599,25 @@ struct TermsView: View {
             }
         }
     }
+}
+
+private func makePhoneCall(to number: String) {
+    #if targetEnvironment(simulator)
+    print("📱 Call simulation — would call \(number)")
+    #else
+    // Clean and prepare number
+    let cleanedNumber = number
+        .replacingOccurrences(of: " ", with: "")
+        .replacingOccurrences(of: "-", with: "")
+        .replacingOccurrences(of: "(", with: "")
+        .replacingOccurrences(of: ")", with: "")
+    
+    guard let url = URL(string: "tel://\(cleanedNumber)") else { return }
+    if UIApplication.shared.canOpenURL(url) {
+        UIApplication.shared.open(url)
+    } else {
+        print("⚠️ Cannot open Phone app or invalid number.")
+    }
+    #endif
 }
 

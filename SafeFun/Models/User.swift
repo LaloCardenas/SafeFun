@@ -2,7 +2,7 @@
 //  User.swift
 //  SafeFun
 //
-//  Created by Santiago Amezcua on 07/11/25.
+//  Created by Santiago Amezcua
 //
 
 import Foundation

@@ -20,7 +20,6 @@ struct LogInView: View {
             self.onContinue = onContinue
         }
 
-    // Action purple (adjust to your palette when you have it)
     private let actionPurple = Color(hex: 0x6C2CF4)
 
     var body: some View {
@@ -31,7 +30,6 @@ struct LogInView: View {
                 Spacer()
                 VStack(alignment: .leading, spacing: 20) {
 
-                    // Navegación programática hacia SignUpView
                     Color.clear
                         .frame(height: 0)
                         .navigationDestination(isPresented: $goToSignUp) {

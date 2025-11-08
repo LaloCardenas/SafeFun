@@ -187,7 +187,6 @@ struct WelcomeView: View {
             })
             .interactiveDismissDisabled(true)
         }
-        // Lanzamos AppTabView como fullScreenCover para que no haya botón de back
         .fullScreenCover(isPresented: $goToCommunities) {
             AppTabView()
         }

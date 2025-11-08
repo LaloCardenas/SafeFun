@@ -125,14 +125,12 @@ struct EmergencyView: View {
     @State private var nearbyUsersStatus: EmergencyActionStatus = .pending
     @State private var communitiesStatus: EmergencyActionStatus = .pending
 
-    // Alert para simulador
     @State private var showSimulatorAlert: Bool = false
 
     var body: some View {
         ZStack {
             Map(position: $cameraPosition) {
                 
-                // Punto azul del usuario
                 UserAnnotation()
                 
                 if let route {
@@ -299,21 +297,17 @@ struct EmergencyView: View {
         [contactsStatus, nearbyUsersStatus, communitiesStatus].allSatisfy { $0 == .sent }
     }
 
-    // Centra el mapa en el usuario (si hay permiso) o en la región default
     private func recenter() {
-        // Primero, vemos si tenemos la ubicación del usuario
         guard let userCoordinate = locationManager.userLocation?.coordinate else {
-            // Si no la tenemos (permiso denegado, etc.), centramos default
             withAnimation {
                 cameraPosition = .region(defaultRegion)
             }
             return
         }
         
-        // Si SÍ la tenemos, creamos una región centrada en el usuario
         let userRegion = MKCoordinateRegion(
             center: userCoordinate,
-            span: MKCoordinateSpan(latitudeDelta: 0.05, longitudeDelta: 0.05) // Un zoom más cercano
+            span: MKCoordinateSpan(latitudeDelta: 0.05, longitudeDelta: 0.05)
         )
         
         withAnimation {
@@ -321,10 +315,8 @@ struct EmergencyView: View {
         }
     }
 
-    // función para calcular la ruta
     private func calculateRoute(to destination: EmergencyPlace) {
         
-        // Verificamos el permiso. Si no hay, no hacemos nada.
         guard locationManager.isAuthorized else {
             print("No hay permiso de ubicación para calcular la ruta.")
             selectedPlace = nil
@@ -337,7 +329,6 @@ struct EmergencyView: View {
             return
         }
         
-        // Borramos la ruta anterior antes de calcular la nueva
         route = nil
 
         // puntos de inicio y fin
@@ -363,7 +354,6 @@ struct EmergencyView: View {
     }
 
 
-    // Flujo simulado de emergencia
     private func triggerEmergencyFlow() async {
         isTriggering = true
         showOverlay = true
@@ -383,7 +373,6 @@ struct EmergencyView: View {
         isTriggering = false
     }
 
-    // Abrir app Teléfono con un número
     private func openPhoneApp(number: String) {
         #if targetEnvironment(simulator)
         showSimulatorAlert = true
