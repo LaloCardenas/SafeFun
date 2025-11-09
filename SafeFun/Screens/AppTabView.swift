@@ -11,6 +11,7 @@ private enum AppTab: Hashable {
     case communities
     case emergency
     case news
+    case chatbot
     case profile
 }
 
@@ -36,6 +37,12 @@ struct AppTabView: View {
                     Label("Noticias", systemImage: "newspaper.fill")
                 }
                 .tag(AppTab.news)
+            
+            ChatBotView()
+                .tabItem {
+                    Label("Chatbot", systemImage: "bubble.left.and.bubble.right.fill")
+                }
+                .tag(AppTab.chatbot)
             
             ProfileView()
                 .tabItem {
