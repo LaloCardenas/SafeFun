@@ -36,7 +36,6 @@ struct LogInView: View {
                             SignUpView()
                         }
 
-                    // Title SafeFun
                     Text("SafeFun")
                         .font(.system(size: 36, weight: .bold, design: .rounded))
                         .foregroundStyle(.white)
@@ -44,17 +43,15 @@ struct LogInView: View {
                         .shadow(color: .black.opacity(0.25), radius: 8, x: 0, y: 6)
                         .padding(.top, 24)
 
-                    // Subtitle
-                    Text("Login")
+                    Text("Iniciar sesión")
                         .font(.system(size: 22, weight: .bold, design: .rounded))
                         .foregroundStyle(.primary)
                         .shadow(color: .black.opacity(0.25), radius: 8, x: 0, y: 6)
                         .frame(maxWidth: .infinity, alignment: .center)
                         .padding(.bottom, 8)
 
-                    // Email
                     VStack(alignment: .leading, spacing: 8) {
-                        Text("Enter your email")
+                        Text("Ingresa tu correo")
                             .font(.subheadline)
                             .foregroundStyle(.primary.opacity(0.9))
 
@@ -74,15 +71,15 @@ struct LogInView: View {
 
                     // Password
                     VStack(alignment: .leading, spacing: 8) {
-                        Text("Enter your password")
+                        Text("Ingresa tu contraseña")
                             .font(.subheadline)
                             .foregroundStyle(.primary.opacity(0.9))
 
                         Group {
                             if isSecure {
-                                SecureField("Password", text: $password)
+                                SecureField("Contraseña", text: $password)
                             } else {
-                                TextField("Password", text: $password)
+                                TextField("Contraseña", text: $password)
                             }
                         }
                         .textInputAutocapitalization(.never)
@@ -117,7 +114,7 @@ struct LogInView: View {
                             if isLoading {
                                 ProgressView().tint(.white)
                             } else {
-                                Text("Continue")
+                                Text("Continuar")
                                     .foregroundStyle(.white)
                                     .font(.system(size: 18, weight: .semibold, design: .rounded))
                             }
@@ -129,10 +126,10 @@ struct LogInView: View {
                     // Link to sign up
                     HStack(spacing: 6) {
                         Spacer()
-                        Text("Don't have an account?")
+                        Text("¿No tienes una cuenta?")
                             .foregroundStyle(.secondary)
                             .font(.subheadline)
-                        Button("Sign Up") {
+                        Button("Registrarme") {
                             onToSignUp()
                         }
                         .font(.subheadline.weight(.semibold))
@@ -144,7 +141,7 @@ struct LogInView: View {
                     // Separator "or"
                     HStack {
                         Rectangle().fill(.white.opacity(0.6)).frame(height: 1)
-                        Text("or")
+                        Text("ó")
                             .font(.footnote)
                             .foregroundStyle(.secondary)
                             .padding(.horizontal, 8)
@@ -161,7 +158,7 @@ struct LogInView: View {
                             Image("google_logo")
                                 .resizable()
                                 .frame(width: 15, height: 15)
-                            Text("Continue with Google")
+                            Text("Continuar con Google")
                                 .foregroundStyle(.primary)
                                 .font(.body.weight(.semibold))
                             Spacer()
@@ -179,9 +176,7 @@ struct LogInView: View {
 
                     // Apple
                     SignInWithAppleButton(.continue) { request in
-                        // Configure your request if you use Apple ID (name, email, scopes)
                     } onCompletion: { result in
-                        // Handle result
                     }
                     .signInWithAppleButtonStyle(.black)
                     .frame(height: 52)
@@ -191,7 +186,7 @@ struct LogInView: View {
                 }
                 .padding(.horizontal, 20)
                 .padding(.top, 24)
-                .frame(maxWidth: 600) // centered for iPad/landscape
+                .frame(maxWidth: 600)
                 .frame(maxWidth: .infinity, alignment: .center)
             }
         }
@@ -211,23 +206,14 @@ struct LogInView: View {
     }
 
     private func onGoogle() {
-        // Connect your Google Sign-In flow here
     }
 
     private func onToSignUp() {
         goToSignUp = true
     }
 
-    private func onOpenTOS() {
-        // Open Terms of Service
-    }
-
-    private func onOpenPrivacy() {
-        // Open Privacy Policy
-    }
 }
 
-// Small utility for Color from hex (remove later if you use your palette)
 private extension Color {
     init(hex: UInt, alpha: Double = 1.0) {
         let r = Double((hex >> 16) & 0xFF) / 255.0

@@ -24,7 +24,7 @@ struct CanadaCitiesView: View {
 }
 
 struct MexicoCitiesView: View {
-    let mexicoCities = ["Mexico City", "Guadalajara", "Monterrey"]
+    let mexicoCities = ["Ciudad de México", "Guadalajara", "Monterrey"]
     
     var body: some View {
         CitiesView(countryName: "Mexico", cities: mexicoCities)

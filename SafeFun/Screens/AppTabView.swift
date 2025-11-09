@@ -21,25 +21,25 @@ struct AppTabView: View {
         TabView(selection: $selectedTab) {
             CommunitiesView()
                 .tabItem {
-                    Label("Communities", systemImage: "person.3.fill")
+                    Label("Comunidades", systemImage: "person.3.fill")
                 }
                 .tag(AppTab.communities)
 
             EmergencyView()
                 .tabItem {
-                    Label("Emergency", systemImage: "exclamationmark.triangle.fill")
+                    Label("Emergencias", systemImage: "exclamationmark.triangle.fill")
                 }
                 .tag(AppTab.emergency)
 
             NewsView()
                 .tabItem {
-                    Label("News", systemImage: "newspaper.fill")
+                    Label("Noticias", systemImage: "newspaper.fill")
                 }
                 .tag(AppTab.news)
             
             ProfileView()
                 .tabItem {
-                    Label("Profile", systemImage: "person.crop.circle.fill")
+                    Label("Perfil", systemImage: "person.crop.circle.fill")
                 }
                 .tag(AppTab.profile)
         }

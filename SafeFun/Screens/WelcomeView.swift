@@ -69,10 +69,9 @@ struct WelcomeView: View {
     var body: some View {
         NavigationStack {
             ZStack {
-                BackgroundView() // reusable background
+                BackgroundView() 
                 VStack {
                     Spacer()
-                    // Section 1: Title and subtitle
                     VStack(spacing: 16) {
                         Text(t("title"))
                             .font(.system(size: 64, weight: .bold, design: .rounded))
@@ -176,11 +175,9 @@ struct WelcomeView: View {
             }
             .toolbar(.hidden, for: .navigationBar)
         }
-        // Presentación del perfil como sheet
         .sheet(isPresented: $showCompleteProfile) {
             CompleteProfileView(onFinish: {
                 showCompleteProfile = false
-                // Al cerrar el sheet, mostramos AppTabView a pantalla completa (sin back)
                 DispatchQueue.main.asyncAfter(deadline: .now() + 0.2) {
                     goToCommunities = true
                 }
@@ -195,7 +192,6 @@ struct WelcomeView: View {
     // MARK: - Derived helpers
 
     private func t(_ key: String) -> String {
-        // Obtiene traducción según idioma seleccionado; fallback a inglés o clave
         translations[key]?[selectedLanguageCode]
         ?? translations[key]?["en"]
         ?? key
@@ -207,10 +203,9 @@ struct WelcomeView: View {
     }
 }
 
-// Modelo simple de idioma (sin bandera)
 private struct Language: Hashable {
-    let code: String   // "en", "es", "fr", ...
-    let name: String   // "English", "Español", ...
+    let code: String
+    let name: String
 }
 
 #Preview {

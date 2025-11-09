@@ -16,10 +16,10 @@ struct ProfileView: View {
         firstName: "Héctor",
         lastName: "Larios",
         username: "heclarios",
-        team: "United States",
+        team: "México",
         emergencyContacts: [
-            EmergencyContact(name: "Mom", phone: "1312345678"),
-            EmergencyContact(name: "Dad", phone: "1287654321")
+            EmergencyContact(name: "Mamá", phone: "55654321"),
+            EmergencyContact(name: "Papá", phone: "55123456")
         ]
     )
     
@@ -46,24 +46,22 @@ struct ProfileView: View {
                     
                     // MARK: - Account
                     ProfileSection(
-                        title: "Account",
+                        title: "Cuenta",
                         rows: [
-                            .init(icon: "person.text.rectangle", title: "Edit profile"),
-                            .init(icon: "checkmark.seal.fill", title: "Verification"),
-                            .init(icon: "mappin.and.ellipse", title: "Team: \(user.team)")
+                            .init(icon: "person.text.rectangle", title: "Editar perfil"),
+                            .init(icon: "checkmark.seal.fill", title: "Verificación"),
+                            .init(icon: "mappin.and.ellipse", title: "Selección: \(user.team)")
                         ],
                         onRowTapped: { rowTitle in
                             switch rowTitle {
-                            case "Edit profile":
+                            case "Editar perfil":
                                 isShowingEditSheet = true
-                            case "Verification":
-                                // Show elegant modal
+                            case "Verificación":
                                 withAnimation(.spring()) {
                                     showVerificationModal = true
                                 }
                             default:
-                                if rowTitle.starts(with: "Team:") {
-                                    // allow edit profile when tapping team
+                                if rowTitle.starts(with: "Selección:") {
                                     isShowingEditSheet = true
                                 }
                             }
@@ -72,7 +70,7 @@ struct ProfileView: View {
                     
                     if !user.emergencyContacts.isEmpty {
                         ProfileSection(
-                            title: "Emergency Contacts",
+                            title: "Contactos de emergencia",
                             rows: user.emergencyContacts.map {
                                 .init(icon: "phone.fill", title: "\($0.name): \($0.phone)")
                             },
@@ -91,16 +89,16 @@ struct ProfileView: View {
                     
                     // MARK: - Preferences
                     ProfileSection(
-                        title: "Preferences",
+                        title: "Preferencias",
                         rows: [
-                            .init(icon: "bell.badge.fill", title: "Notifications"),
-                            .init(icon: "hand.raised.fill", title: "Privacy"),
+                            .init(icon: "bell.badge.fill", title: "Notificaciones"),
+                            .init(icon: "hand.raised.fill", title: "Privacidad"),
                         ],
                         onRowTapped: { rowTitle in
                             switch rowTitle {
-                            case "Notifications":
+                            case "Notificaciones":
                                 showNotificationsScreen = true
-                            case "Privacy":
+                            case "Privacidad":
                                 showPrivacyScreen = true
                             default:
                                 break
@@ -110,15 +108,13 @@ struct ProfileView: View {
                     
                     // MARK: - Security
                     ProfileSection(
-                        title: "Security",
+                        title: "Seguridad",
                         rows: [
-                            .init(icon: "list.bullet.rectangle.portrait.fill", title: "Terms & privacy")
+                            .init(icon: "list.bullet.rectangle.portrait.fill", title: "Términos y condiciones")
                         ],
                         onRowTapped: { rowTitle in
-                            if rowTitle == "Terms & privacy" {
+                            if rowTitle == "Términos y condiciones" {
                                 showTermsScreen = true
-                            } else if rowTitle == "Password & access" {
-                                isShowingEditSheet = true
                             }
                         }
                     )
@@ -152,7 +148,7 @@ struct ProfileView: View {
                                 showVerificationModal = false
                             }
                         } label: {
-                            Text("Close")
+                            Text("Cerrar")
                                 .bold()
                                 .frame(maxWidth: .infinity)
                                 .padding(.vertical, 12)
@@ -183,11 +179,6 @@ struct ProfileView: View {
         }
         .sheet(isPresented: $showTermsScreen) {
             TermsView()
-        }
-        .alert("Call Simulation", isPresented: $showSimulatorAlert) {
-            Button("OK", role: .cancel) { }
-        } message: {
-            Text("There's no Phone app on this simulator. On a physical device, tapping “Call 911” would call 811.")
         }
         
         .fullScreenCover(isPresented: $showWelcomeView) {
@@ -241,9 +232,9 @@ private struct ProfileHeaderCard: View {
 
             GeometryReader { proxy in
                 HStack(spacing: 12) {
-                    StatPill(icon: "flag.fill", value: user.team, label: "Team", equalHeight: pillsEqualHeight)
+                    StatPill(icon: "flag.fill", value: user.team, label: "Selección", equalHeight: pillsEqualHeight)
                         .frame(width: (proxy.size.width - 32) / 2)
-                    StatPill(icon: "bell.fill", value: "2", label: "Alerts", equalHeight: pillsEqualHeight)
+                    StatPill(icon: "bell.fill", value: "2", label: "Alertas", equalHeight: pillsEqualHeight)
                         .frame(width: (proxy.size.width - 40) / 2)
                 }
                 .onPreferenceChange(PillMaxHeightKey.self) { maxH in
@@ -430,10 +421,10 @@ private struct VerificationAlertView: View {
                 .foregroundStyle(.green)
 
             VStack(alignment: .leading, spacing: 2) {
-                Text("Account Verified")
+                Text("Cuenta Verificada")
                     .font(.headline)
                     .foregroundStyle(.primary)
-                Text("You can now access all the functionalities of the communities.")
+                Text("Ahora puedes acceder a todas las funcionalidades de las comunidades.")
                     .font(.callout)
                     .foregroundStyle(.secondary)
             }
@@ -455,24 +446,24 @@ struct NotificationsSettingsView: View {
 
     @State private var liveResults = true
     @State private var localNews = true
-    @State private var selectedCity = "Mexico City"
-    private let cities = ["Toronto", "Vancouver", "Mexico City", "Guadalajara", "Monterrey", "Atlanta", "Boston", "Dallas", "Houston", "Kansas City", "Los Angeles", "Miami", "New York", "Philadelphia", "Seattle", "San Francisco"].sorted()
+    @State private var selectedCity = "Ciudad de México"
+    private let cities = ["Toronto", "Vancouver", "Ciudad de México", "Guadalajara", "Monterrey", "Atlanta", "Boston", "Dallas", "Houston", "Kansas City", "Los Angeles", "Miami", "New York", "Philadelphia", "Seattle", "San Francisco"].sorted()
 
 
     var body: some View {
         NavigationStack {
             Form {
-                Section("Communities") {
-                    Toggle("Messages", isOn: $messages)
-                    Toggle("Invitations", isOn: $invitations)
-                    Toggle("New members", isOn: $newMembers)
-                    Toggle("Updates to meeting points", isOn: $meetingUpdates)
+                Section("Comunidades") {
+                    Toggle("Mensajes", isOn: $messages)
+                    Toggle("Invitaciones", isOn: $invitations)
+                    Toggle("Miembros nuevos", isOn: $newMembers)
+                    Toggle("Actualizaciones a puntos de reunión", isOn: $meetingUpdates)
                 }
-                Section("News") {
-                    Toggle("Live results", isOn: $liveResults)
-                    Toggle("Relevant news in my city", isOn: $localNews)
+                Section("Noticias") {
+                    Toggle("Resultados en vivo", isOn: $liveResults)
+                    Toggle("Noticias relevanes en la ciudad", isOn: $localNews)
                     if localNews {
-                        Picker("Selected city", selection: $selectedCity) {
+                        Picker("Ciudad seleccionada", selection: $selectedCity) {
                             ForEach(cities, id: \.self) { city in
                                 Text(city)
                             }
@@ -480,10 +471,10 @@ struct NotificationsSettingsView: View {
                     }
                 }
             }
-            .navigationTitle("Notifications")
+            .navigationTitle("Notificaciones")
             .toolbar {
                 ToolbarItem(placement: .confirmationAction) {
-                    Button("Done") { dismiss() }
+                    Button("Listo") { dismiss() }
                 }
             }
         }
@@ -498,11 +489,11 @@ struct PrivacyView: View {
     var body: some View {
         NavigationStack {
             Form {
-                Section("App Access") {
+                Section("Accesos de la aplicación") {
                     HStack {
                         VStack(alignment: .leading) {
-                            Text("Phone")
-                            Text(phoneAvailable ? "Accessible" : "Not available")
+                            Text("Teléfono")
+                            Text(phoneAvailable ? "Accesible" : "No disponible")
                                 .font(.caption)
                                 .foregroundStyle(.secondary)
                         }
@@ -513,7 +504,7 @@ struct PrivacyView: View {
 
                     HStack {
                         VStack(alignment: .leading) {
-                            Text("Location (real-time)")
+                            Text("Ubicación (en tiempo real)")
                             Text(locationStatusDescription)
                                 .font(.caption)
                                 .foregroundStyle(.secondary)
@@ -524,10 +515,10 @@ struct PrivacyView: View {
                     }
                 }
             }
-            .navigationTitle("Privacy")
+            .navigationTitle("Privacidad")
             .toolbar {
                 ToolbarItem(placement: .confirmationAction) {
-                    Button("Done") { dismiss() }
+                    Button("Listo") { dismiss() }
                 }
             }
             .onAppear {
@@ -539,12 +530,12 @@ struct PrivacyView: View {
 
     private var locationStatusDescription: String {
         switch locationStatus {
-        case .notDetermined: return "Not determined"
-        case .restricted: return "Restricted"
-        case .denied: return "Denied"
-        case .authorizedAlways: return "Authorized (always)"
-        case .authorizedWhenInUse: return "Authorized (when in use)"
-        @unknown default: return "Unknown"
+        case .notDetermined: return "Sin determinar"
+        case .restricted: return "Restringida"
+        case .denied: return "Negada"
+        case .authorizedAlways: return "Autorizada (siempre)"
+        case .authorizedWhenInUse: return "Autorizada (cuando la app esta en uso)"
+        @unknown default: return "Desconocido"
         }
     }
 }
@@ -567,21 +558,20 @@ struct TermsView: View {
         NavigationStack {
             ScrollView {
                 VStack(alignment: .leading, spacing: 12) {
-                    Text("How we use your data")
-                        .font(.title2).bold()
-                    Text("All data in SafeFun is processed and stored locally on your device unless explicitly stated otherwise. We do not sell user data. The following summarizes key points:")
+                    Text("Cómo usamos tus datos").font(.title2).bold()
+                    Text("Todos los datos en SafeFun se procesan y almacenan localmente en tu dispositivo, a menos que se indique explícitamente lo contrario. No vendemos datos de usuarios. A continuación se resumen los puntos clave:")
                     Group {
-                        Text("• Location: Used to show your position on the map and nearby resources. Location data is used in real-time and is not uploaded by default.")
-                        Text("• Contacts: Emergency contacts are stored locally to allow quick calling / messaging during an emergency.")
-                        Text("• Messages and community content: Community messages are stored locally or in the community server depending on the feature. Sensitive data is minimized.")
+                        Text("• Ubicación: Se usa para mostrar tu posición en el mapa y los recursos cercanos. Los datos de ubicación se utilizan en tiempo real y no se suben por defecto.")
+                        Text("• Contactos: Los contactos de emergencia se almacenan localmente para permitir llamadas / mensajes rápidos durante una emergencia.")
+                        Text("• Mensajes y contenido comunitario: Los mensajes de la comunidad se almacenan localmente o en el servidor de la comunidad, dependiendo de la función. Los datos sensibles se minimizan.")
                     }
                     .font(.callout)
                     .foregroundStyle(.secondary)
 
                     VStack(alignment: .leading, spacing: 8) {
-                        Text("Local-first approach")
+                        Text("Enfoque local")
                             .font(.headline)
-                        Text("Most features use a local-first approach so your device stays in control of the data. Always check the specific community or feature if you want to opt-out.")
+                        Text("La mayoría de las funciones usan un enfoque local para que tu dispositivo mantenga el control de los datos. Revisa siempre la comunidad o función específica si deseas optar por no participar.")
                             .font(.callout)
                             .foregroundStyle(.secondary)
                     }
@@ -591,10 +581,10 @@ struct TermsView: View {
                 }
                 .padding()
             }
-            .navigationTitle("Terms & privacy")
+            .navigationTitle("Términos y condiciones")
             .toolbar {
                 ToolbarItem(placement: .confirmationAction) {
-                    Button("Done") { dismiss() }
+                    Button("Listo") { dismiss() }
                 }
             }
         }

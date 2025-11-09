@@ -32,29 +32,28 @@ struct EditProfileView: View {
                 ScrollView(showsIndicators: false) {
                     VStack(spacing: 16) {
                         
-                        SectionCard(title: "Basic information") {
-                            GlassField(systemIcon: "person.fill", placeholder: "First Name", text: $user.firstName)
-                            GlassField(systemIcon: "person.fill", placeholder: "Last Name", text: $user.lastName)
-                            GlassField(systemIcon: "at", placeholder: "Username", text: $user.username)
+                        SectionCard(title: "Información básica") {
+                            GlassField(systemIcon: "person.fill", placeholder: "Nombre", text: $user.firstName)
+                            GlassField(systemIcon: "person.fill", placeholder: "Apellido", text: $user.lastName)
+                            GlassField(systemIcon: "at", placeholder: "Nombre de usuario", text: $user.username)
                                 .textInputAutocapitalization(.never)
                                 .autocorrectionDisabled()
                             
                             TeamPicker(selected: $user.team)
                         }
 
-                        // --- NUEVA SECCIÓN DINÁMICA ---
-                        SectionCard(title: "Emergency Contacts") {
+                        SectionCard(title: "Contactos de emergencia") {
                             ForEach($user.emergencyContacts) { $contact in
                                 VStack {
-                                    GlassField(systemIcon: "person.text.rectangle", placeholder: "Contact Name", text: $contact.name)
-                                    GlassField(systemIcon: "phone.fill", placeholder: "Contact Phone", text: $contact.phone, keyboard: .phonePad)
+                                    GlassField(systemIcon: "person.text.rectangle", placeholder: "Nombre del contacto", text: $contact.name)
+                                    GlassField(systemIcon: "phone.fill", placeholder: "Número del contacto", text: $contact.phone, keyboard: .phonePad)
                                 }
                                 .padding(.bottom, 5)
                             }
                             .onDelete(perform: deleteContact)
                             
                             Button(action: addContact) {
-                                Label("Add Contact", systemImage: "plus.circle.fill")
+                                Label("Agregar contacto", systemImage: "plus.circle.fill")
                                     .font(.callout.bold())
                                     .frame(maxWidth: .infinity)
                                     .padding(.vertical, 10)
@@ -70,17 +69,17 @@ struct EditProfileView: View {
                     .padding(.bottom, 24)
                 }
             }
-            .navigationTitle("Edit Profile")
+            .navigationTitle("Editar perfil")
             .navigationBarTitleDisplayMode(.inline)
             .toolbar {
                 ToolbarItem(placement: .cancellationAction) {
-                    Button("Cancel") {
+                    Button("Cancelar") {
                         user = originalUser
                         dismiss()
                     }
                 }
                 ToolbarItem(placement: .confirmationAction) {
-                    Button("Save") {
+                    Button("Guardar") {
                         dismiss()
                     }
                 }
@@ -125,7 +124,7 @@ private struct AvatarPicker: View {
             }
 
             PhotosPicker(selection: $selection, matching: .images) {
-                Label("Choose photo", systemImage: "camera.fill")
+                Label("Elegir foto", systemImage: "camera.fill")
                     .font(.callout.bold()).padding(.vertical, 8).padding(.horizontal, 14)
                     .background(.ultraThinMaterial, in: Capsule())
                     .overlay(Capsule().stroke(.white.opacity(0.2), lineWidth: 1))
@@ -193,7 +192,7 @@ private struct TeamPicker: View {
     @Binding var selected: String
     
     private let teams = [
-        "Mexico", "United States", "Canada",
+        "México", "United States", "Canada",
         "Algeria", "Argentina", "Australia", "Austria", "Belgium", "Brazil",
         "Cameroon", "Chile", "Colombia", "Costa Rica", "Croatia", "Denmark",
         "Ecuador", "Egypt", "England", "France", "Germany", "Ghana", "Iran",
@@ -202,13 +201,12 @@ private struct TeamPicker: View {
         "Poland", "Portugal", "Qatar", "Saudi Arabia", "Senegal", "Serbia",
         "South Korea", "Spain", "Sweden", "Switzerland", "Tunisia", "Ukraine",
         "Uruguay", "Uzbekistan",
-        "Other…"
     ]
 
     var body: some View {
         Menu {
             Picker("team", selection: $selected) {
-                Text("Select Team").tag("")
+                Text("Elige tu selección").tag("")
                 ForEach(teams, id: \.self) { Text($0).tag($0) }
             }
         } label: {

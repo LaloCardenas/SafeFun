@@ -3,18 +3,9 @@
 //  SafeFun
 //
 //  Created by Facultad de Contaduría y Administración on 20/10/25.
-//
-
-//
-//  GruposView.swift
-//  SafeFun
-//
-//  Created by Facultad de Contaduría y Administración on 20/10/25.
-//
 
 import SwiftUI
 
-// --- Define custom colors ---
 let darkGrayTable = Color(white: 0.25)
 let slightlyLighterGray = Color(white: 0.3)
 
@@ -33,30 +24,15 @@ struct BotonFiltro: View {
     }
 }
 
-// --- Define la lista de grupos consumiendo los datos del archivo de Modelos ---
 let allWCGroups: [WCGroup] = [.sampleWCGroupA, .sampleWCGroupB, .sampleWCGroupC, .sampleWCGroupD, .sampleWCGroupE, .sampleWCGroupF, .sampleWCGroupG, .sampleWCGroupH, .sampleWCGroupI, .sampleWCGroupJ, .sampleWCGroupK, .sampleWCGroupL]
 
-
-// --- 3. MAIN GROUPS LIST VIEW (MODIFICADA) ---
 
 struct WCGroupsListView: View {
     var body: some View {
         ZStack {
             BackgroundView()
             VStack {
-                /*
-                 
-                 HStack(spacing: 12) {
-                    BotonFiltro(texto: "Comunity", icono: "person.2")
-                    BotonFiltro(texto: "Seleccion Country", icono: "list.bullet")
-                    Spacer()
-                }
-                .padding(.horizontal)
-                .padding(.top)
-                 
-                 */
 
-                // --- INICIO DE LA MODIFICACIÓN ---
                 ScrollView {
                     VStack(spacing: 10) {
                         ForEach(allWCGroups) { group in
@@ -83,7 +59,7 @@ struct WCGroupsListView: View {
                 }
             }
         }
-        .navigationTitle("Groups")
+        .navigationTitle("Grupos")
         .navigationBarTitleDisplayMode(.inline)
     }
 }
@@ -99,7 +75,7 @@ struct WCGroupDetailView: View {
             ScrollView {
                 VStack(alignment: .leading, spacing: 20) {
                     
-                    Text("Group stage")
+                    Text("Etapa de grupos")
                         .font(.title2)
                         .fontWeight(.bold)
                         .padding(.horizontal)
@@ -107,14 +83,14 @@ struct WCGroupDetailView: View {
                     VStack(spacing: 0) {
                         
                         HStack {
-                            Text("Club")
+                            Text("País")
                                 .frame(maxWidth: .infinity, alignment: .leading)
                             Spacer()
-                            Text("MP").frame(width: 30)
-                            Text("W").frame(width: 30)
-                            Text("D").frame(width: 30)
-                            Text("L").frame(width: 30)
-                            Text("GD").frame(width: 30)
+                            Text("PJ").frame(width: 30)
+                            Text("G").frame(width: 30)
+                            Text("P").frame(width: 30)
+                            Text("E").frame(width: 30)
+                            Text("DG").frame(width: 30)
                             Text("Pts").frame(width: 35)
                         }
                         .font(.caption.bold())
@@ -134,7 +110,6 @@ struct WCGroupDetailView: View {
                     
                     Divider().padding(.horizontal)
                     
-                    // --- LISTA DE PARTIDOS ---
                     ForEach(group.matchdays) { matchday in
                         Text(matchday.name)
                             .font(.headline)
@@ -155,8 +130,6 @@ struct WCGroupDetailView: View {
     }
 }
 
-// --- 5. HELPER COMPONENTS ---
-// --- Fila de la Tabla de Posiciones ---
 struct WCGroupStandingRow: View {
     let standing: GroupStanding
     let position: Int
@@ -197,7 +170,6 @@ struct WCGroupStandingRow: View {
 }
 
 
-// --- Fila de Partido ---
 struct MatchRow: View {
     let match: Match
     
@@ -245,7 +217,6 @@ struct MatchRow: View {
 }
 
 
-// --- 6. PREVIEWS ---
 struct WCGroupsListView_Previews: PreviewProvider {
     static var previews: some View {
         NavigationView {

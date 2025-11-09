@@ -48,10 +48,10 @@ struct CountdownBannerView: View {
                     .foregroundColor(.white)
                 
                 HStack(spacing: 20) {
-                    timeComponent(value: timeRemaining.days, label: "DAYS")
+                    timeComponent(value: timeRemaining.days, label: "DÍAS")
                     timeComponent(value: timeRemaining.hours, label: "HRS")
                     timeComponent(value: timeRemaining.minutes, label: "MIN")
-                    timeComponent(value: timeRemaining.seconds, label: "SEC")
+                    timeComponent(value: timeRemaining.seconds, label: "SEG")
                 }
             }
         }

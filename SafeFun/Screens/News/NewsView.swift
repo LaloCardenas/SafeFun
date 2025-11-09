@@ -26,24 +26,20 @@ struct NewsView: View {
                 ScrollView(showsIndicators: false) {
                     VStack(alignment: .leading, spacing: 20) {
                         
-                        // Título principal
-                        Text("News")
+                        Text("Noticias")
                             .font(.largeTitle.bold())
                             .foregroundStyle(.primary)
                             .padding(.horizontal)
                             .padding(.top, 6)
                         
-                        // --- MAIN BANNER ---
                         CountdownBannerView()
                         
-                        // --- GROUPS SECTION (card) ---
-                        NewsSectionCard(title: "Groups") {
-                            // Header de navegación a lista completa
+                        NewsSectionCard(title: "Grupos") {
                             NavigationLink {
                                 WCGroupsListView()
                             } label: {
                                 HStack {
-                                    Text("See all groups")
+                                    Text("Ver todos los grupos")
                                         .font(.subheadline.bold())
                                     Spacer()
                                     Image(systemName: "chevron.right")
@@ -98,10 +94,10 @@ struct NewsView: View {
                         .padding(.horizontal)
                         
                         // --- USA CITIES SECTION (card) ---
-                        NewsSectionCard(title: "USA") {
+                        NewsSectionCard(title: "EUA") {
                             NavigationLink(destination: CitiesView(countryName: "USA", cities: usa.usaCities)) {
                                 HStack {
-                                    Text("See all cities")
+                                    Text("Ver todas las ciudades")
                                         .font(.subheadline.bold())
                                     Spacer()
                                     Image(systemName: "chevron.right")
@@ -128,7 +124,7 @@ struct NewsView: View {
                         NewsSectionCard(title: "MEXICO") {
                             NavigationLink(destination: CitiesView(countryName: "MEXICO", cities: mexico.mexicoCities)) {
                                 HStack {
-                                    Text("See all cities")
+                                    Text("Ver todas las ciudades")
                                         .font(.subheadline.bold())
                                     Spacer()
                                     Image(systemName: "chevron.right")
@@ -155,7 +151,7 @@ struct NewsView: View {
                         NewsSectionCard(title: "CANADA") {
                             NavigationLink(destination: CitiesView(countryName: "CANADA", cities: canada.canadaCities)) {
                                 HStack {
-                                    Text("See all cities")
+                                    Text("Ver todas las ciudades")
                                         .font(.subheadline.bold())
                                     Spacer()
                                     Image(systemName: "chevron.right")
@@ -189,7 +185,7 @@ struct NewsView: View {
     }
     
     
-    // --- HELPER VIEWS ---
+
     
     struct FilterButton: View {
         var text: String
@@ -238,7 +234,7 @@ struct NewsView: View {
                         )
                         .shadow(radius: 8, y: 4)
                 }
-                Text("Group \(letter)")
+                Text("Grupo \(letter)")
                     .font(.headline)
                     .foregroundStyle(.primary)
                     .fontWeight(.medium)
@@ -307,7 +303,6 @@ struct NewsSectionCard<Content: View>: View {
     }
 }
 
-// You will need this for the preview to work
 
 struct NewsView_Previews: PreviewProvider {
     static var previews: some View {

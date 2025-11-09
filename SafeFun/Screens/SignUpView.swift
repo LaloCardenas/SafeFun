@@ -10,7 +10,7 @@ import AuthenticationServices
 
 struct SignUpView: View {
     
-    var onContinue: () -> Void = {}   // valor por defecto para no romper previews
+    var onContinue: () -> Void = {}
 
     @State private var email: String = ""
     @State private var password: String = ""
@@ -18,7 +18,6 @@ struct SignUpView: View {
     @State private var isLoading: Bool = false
     @State private var goToLogIn: Bool = false
 
-    // Debe coincidir con LogInView para coherencia visual
     private let actionPurple = Color(hex: 0x6C2CF4)
 
     var body: some View {
@@ -29,7 +28,6 @@ struct SignUpView: View {
                 Spacer()
                 VStack(alignment: .leading, spacing: 20) {
 
-                    // Navegación programática hacia LogInView
                     Color.clear
                         .frame(height: 0)
                         .navigationDestination(isPresented: $goToLogIn) {
@@ -45,7 +43,7 @@ struct SignUpView: View {
                         .padding(.top, 24)
 
                     // Subtitle
-                    Text("Sign Up")
+                    Text("Registrarse")
                         .font(.system(size: 22, weight: .bold, design: .rounded))
                         .foregroundStyle(.primary)
                         .shadow(color: .black.opacity(0.25), radius: 8, x: 0, y: 6)
@@ -54,7 +52,7 @@ struct SignUpView: View {
 
                     // Email
                     VStack(alignment: .leading, spacing: 8) {
-                        Text("Enter your email")
+                        Text("Ingresa tu correo")
                             .font(.subheadline)
                             .foregroundStyle(.primary.opacity(0.9))
 
@@ -74,15 +72,15 @@ struct SignUpView: View {
 
                     // Password
                     VStack(alignment: .leading, spacing: 8) {
-                        Text("Create a password")
+                        Text("Crea una contraseña")
                             .font(.subheadline)
                             .foregroundStyle(.primary.opacity(0.9))
 
                         Group {
                             if isSecure {
-                                SecureField("Password", text: $password)
+                                SecureField("Contraseña", text: $password)
                             } else {
-                                TextField("Password", text: $password)
+                                TextField("Contraseña", text: $password)
                             }
                         }
                         .textInputAutocapitalization(.never)
@@ -117,7 +115,7 @@ struct SignUpView: View {
                             if isLoading {
                                 ProgressView().tint(.white)
                             } else {
-                                Text("Create account")
+                                Text("Crear cuenta")
                                     .foregroundStyle(.white)
                                     .font(.system(size: 18, weight: .semibold, design: .rounded))
                             }
@@ -129,10 +127,10 @@ struct SignUpView: View {
                     // Link to log in
                     HStack(spacing: 6) {
                         Spacer()
-                        Text("Already have an account?")
+                        Text("¿Ya tienes una cuenta?")
                             .foregroundStyle(.secondary)
                             .font(.subheadline)
-                        Button("Log In") {
+                        Button("Iniciar sesión") {
                             onToLogIn()
                         }
                         .font(.subheadline.weight(.semibold))
@@ -141,10 +139,9 @@ struct SignUpView: View {
                     }
                     .padding(.top, 4)
 
-                    // Separator "or"
                     HStack {
                         Rectangle().fill(.white.opacity(0.6)).frame(height: 1)
-                        Text("or")
+                        Text("ó")
                             .font(.footnote)
                             .foregroundStyle(.secondary)
                             .padding(.horizontal, 8)
@@ -161,7 +158,7 @@ struct SignUpView: View {
                             Image("google_logo")
                                 .resizable()
                                 .frame(width: 15, height: 15)
-                            Text("Continue with Google")
+                            Text("Continuar con Google")
                                 .foregroundStyle(.primary)
                                 .font(.body.weight(.semibold))
                             Spacer()
@@ -177,11 +174,8 @@ struct SignUpView: View {
                     }
                     .buttonStyle(.plain)
 
-                    // Apple
                     SignInWithAppleButton(.signUp) { request in
-                        // Configure request for Sign Up if necessary
                     } onCompletion: { result in
-                        // Handle result
                     }
                     .signInWithAppleButtonStyle(.black)
                     .frame(height: 52)
@@ -210,7 +204,6 @@ struct SignUpView: View {
     }
 
     private func onGoogle() {
-        // Conecta tu flujo de Google Sign-In aquí
     }
 
     private func onToLogIn() {
@@ -218,7 +211,6 @@ struct SignUpView: View {
     }
 }
 
-// Small utility for Color from hex (reutilizada de LogInView)
 private extension Color {
     init(hex: UInt, alpha: Double = 1.0) {
         let r = Double((hex >> 16) & 0xFF) / 255.0

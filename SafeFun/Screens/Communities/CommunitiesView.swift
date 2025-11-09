@@ -25,9 +25,8 @@ struct CommunitiesView: View {
                 ScrollView(showsIndicators: false) {
                     VStack(alignment: .leading, spacing: 24) {
 
-                        // Header sin botón Create
                         HStack {
-                            Text("Communities")
+                            Text("Comunidades")
                                 .font(.largeTitle.bold())
                                 .foregroundStyle(.primary)
                             Spacer()
@@ -37,14 +36,13 @@ struct CommunitiesView: View {
 
                         // Featured section
                         VStack(alignment: .leading, spacing: 10) {
-                            SectionHeader(title: "Featured communities")
+                            SectionHeader(title: "Comunidades recomendadas")
                                 .padding(.horizontal)
 
                             ScrollView(.horizontal, showsIndicators: false) {
                                 HStack(spacing: 16) {
                                     ForEach(featured) { community in
                                         NavigationLink {
-                                            // Comunidades existentes: chat con mocks (isNew: false)
                                             ComunityChatView(community: community.toLite(), isNew: false)
                                         } label: {
                                             FeaturedCommunityCard(community: community)
@@ -57,9 +55,8 @@ struct CommunitiesView: View {
                             }
                         }
 
-                        // My communities section
                         VStack(alignment: .leading, spacing: 10) {
-                            SectionHeader(title: "My communities")
+                            SectionHeader(title: "Mis comunidades")
                                 .padding(.horizontal)
 
                             ScrollView(.horizontal, showsIndicators: false) {
@@ -67,7 +64,6 @@ struct CommunitiesView: View {
                                     ForEach(myCommunities) { community in
                                         VStack(spacing: 8) {
                                             NavigationLink {
-                                                // Comunidades existentes: chat con mocks (isNew: false)
                                                 ComunityChatView(community: community.toLite(), isNew: false)
                                             } label: {
                                                 CommunityCircleAvatar(community: community)
@@ -87,9 +83,8 @@ struct CommunitiesView: View {
                             }
                         }
 
-                        // Create block (único punto de creación)
                         VStack(alignment: .leading, spacing: 12) {
-                            Text("Start your own community")
+                            Text("Empieza tu propia comunidad")
                                 .font(.headline)
                                 .foregroundStyle(.primary)
 
@@ -111,9 +106,9 @@ struct CommunitiesView: View {
                                     }
 
                                     VStack(alignment: .leading, spacing: 4) {
-                                        Text("Create a community")
+                                        Text("Crear una comunidad")
                                             .font(.subheadline.bold())
-                                        Text("Gather people with shared interests or location.")
+                                        Text("Reúne a personas con intereses similares.")
                                             .font(.footnote)
                                             .foregroundStyle(.secondary)
                                             .lineLimit(2)
@@ -139,7 +134,6 @@ struct CommunitiesView: View {
                 }
             }
             .navigationBarTitleDisplayMode(.inline)
-            // Navegación programática al chat recién creado (Opción 1: Group + EmptyView)
             .background(
                 NavigationLink(
                     isActive: Binding(
@@ -151,7 +145,6 @@ struct CommunitiesView: View {
                     destination: {
                         Group {
                             if let lite = navigateToCommunity {
-                                // Nueva comunidad: chat vacío (isNew: true)
                                 ComunityChatView(community: lite, isNew: true)
                             } else {
                                 EmptyView()
@@ -164,9 +157,7 @@ struct CommunitiesView: View {
             )
             .sheet(isPresented: $showCreate) {
                 CreateCommunityView { newCommunity in
-                    // Insertar al inicio de "My communities"
                     myCommunities.insert(newCommunity, at: 0)
-                    // Navegar al chat vacío de la nueva comunidad
                     navigateToCommunity = newCommunity.toLite()
                 }
                 .presentationDetents([.medium, .large])
@@ -191,7 +182,7 @@ struct Community: Identifiable, Hashable {
 
     static let sampleFeatured: [Community] = [
         .init(name: "NYC Fans", emoji: "🗽", members: 1280, featured: true, color: .purple),
-        .init(name: "CDMX Safe", emoji: "🦅", members: 980, featured: true, color: .blue),
+        .init(name: "CDMX Segura", emoji: "🦅", members: 980, featured: true, color: .blue),
         .init(name: "Toronto Hub", emoji: "🍁", members: 640, featured: true, color: .red),
         .init(name: "LA Watch", emoji: "🌴", members: 720, featured: true, color: .orange)
     ]
@@ -199,8 +190,8 @@ struct Community: Identifiable, Hashable {
     static let sampleMine: [Community] = [
         .init(name: "Roommates", emoji: "🏠", members: 6, featured: false, color: .teal),
         .init(name: "Fan Club", emoji: "⚽️", members: 24, featured: false, color: .green),
-        .init(name: "Volunteers", emoji: "🤝", members: 18, featured: false, color: .pink),
-        .init(name: "Neighbors", emoji: "🏘️", members: 12, featured: false, color: .indigo)
+        .init(name: "Voluntarios", emoji: "🤝", members: 18, featured: false, color: .pink),
+        .init(name: "Vecinos", emoji: "🏘️", members: 12, featured: false, color: .indigo)
     ]
 }
 
@@ -223,7 +214,6 @@ private struct FeaturedCommunityCard: View {
 
     var body: some View {
         VStack(alignment: .leading, spacing: 10) {
-            // Top image/emoji area
             ZStack {
                 RoundedRectangle(cornerRadius: 16, style: .continuous)
                     .fill(
@@ -247,7 +237,7 @@ private struct FeaturedCommunityCard: View {
                     Image(systemName: "person.3.fill")
                         .font(.caption)
                         .foregroundStyle(.secondary)
-                    Text("\(community.members) members")
+                    Text("\(community.members) miembros")
                         .font(.caption)
                         .foregroundStyle(.secondary)
                 }
@@ -289,21 +279,17 @@ private struct CommunityCircleAvatar: View {
     }
 }
 
-// Create view mejorada y simplificada (Details: solo nombre y privada)
 struct CreateCommunityView: View {
     @Environment(\.dismiss) private var dismiss
 
-    // Callback para notificar la nueva comunidad al padre
     var onCreate: (Community) -> Void = { _ in }
 
     @State private var name: String = ""
     @State private var isPrivate: Bool = false
 
-    // Tags (se mantienen como pediste)
     @State private var tagInput: String = ""
     @State private var tags: [String] = []
 
-    // Invitación (se mantiene como pediste)
     @State private var invitationID: UUID?
     @State private var invitationURL: URL?
     @State private var qrImage: Image?
@@ -317,18 +303,17 @@ struct CreateCommunityView: View {
             ZStack {
                 BackgroundView()
                 Form {
-                    // Solo nombre y switch privada
-                    Section("Details") {
-                        TextField("Community name", text: $name)
-                        Toggle("Private community", isOn: $isPrivate)
+                    Section("Detalles") {
+                        TextField("Nombre de la comunidad", text: $name)
+                        Toggle("Comunidad privada", isOn: $isPrivate)
                     }
 
-                    Section("Tags") {
+                    Section("Etiquetas") {
                         HStack(spacing: 8) {
-                            TextField("Add a tag (e.g. fútbol, vecinos)", text: $tagInput, onCommit: addTag)
+                            TextField("Añade etiquetas (e.g. fútbol, vecinos)", text: $tagInput, onCommit: addTag)
                                 .textInputAutocapitalization(.never)
                                 .autocorrectionDisabled(true)
-                            Button("Add") { addTag() }
+                            Button("Agregar") { addTag() }
                                 .disabled(tagInput.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty)
                         }
 
@@ -336,11 +321,11 @@ struct CreateCommunityView: View {
                             WrappingTagsView(tags: tags, onRemove: removeTag)
                                 .padding(.vertical, 4)
                         } else {
-                            Text("No tags yet").foregroundStyle(.secondary)
+                            Text("Sin etiquetas").foregroundStyle(.secondary)
                         }
                     }
 
-                    Section("Invitation") {
+                    Section("Invitación") {
                         if let url = invitationURL {
                             VStack(alignment: .leading, spacing: 8) {
                                 Text("Invite link")
@@ -385,7 +370,7 @@ struct CreateCommunityView: View {
                             Button {
                                 generateInvitation()
                             } label: {
-                                Text("Generate invitation")
+                                Text("Generar invitación")
                             }
                             .disabled(name.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty)
                         }
@@ -393,10 +378,9 @@ struct CreateCommunityView: View {
 
                     Section {
                         Button {
-                            // Crear la comunidad y notificar al padre
                             let new = Community(
                                 name: name.trimmingCharacters(in: .whitespacesAndNewlines),
-                                emoji: "👥", // emoji fijo para mock; puedes mapear por tags o elegir aleatorio
+                                emoji: "👥",
                                 members: 1,
                                 featured: false,
                                 color: randomCommunityColor()
@@ -404,7 +388,7 @@ struct CreateCommunityView: View {
                             onCreate(new)
                             dismiss()
                         } label: {
-                            Text("Create")
+                            Text("Crear")
                                 .frame(maxWidth: .infinity, alignment: .center)
                         }
                         .disabled(name.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty)
@@ -415,7 +399,7 @@ struct CreateCommunityView: View {
                 if showCopiedToast {
                     VStack {
                         Spacer()
-                        Text("Link copied")
+                        Text("Link copiado")
                             .padding(.horizontal, 16)
                             .padding(.vertical, 10)
                             .background(.ultraThinMaterial, in: Capsule())
@@ -425,10 +409,10 @@ struct CreateCommunityView: View {
                     .transition(.move(edge: .bottom).combined(with: .opacity))
                 }
             }
-            .navigationTitle("Create community")
+            .navigationTitle("Crear comunidad")
             .toolbar {
                 ToolbarItem(placement: .topBarLeading) {
-                    Button("Cancel") { dismiss() }
+                    Button("Cancelar") { dismiss() }
                 }
             }
         }
@@ -474,13 +458,11 @@ struct CreateCommunityView: View {
     }
 
     private func randomCommunityColor() -> Color {
-        // Usa tu set de colores de marca si quieres
         let palette: [Color] = [.teal, .green, .indigo, .pink, .orange, .purple, .blue, .red]
         return palette.randomElement() ?? .teal
     }
 }
 
-// Vista de chips de tags con wrap
 private struct WrappingTagsView: View {
     let tags: [String]
     var onRemove: (String) -> Void

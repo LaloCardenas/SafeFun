@@ -30,7 +30,6 @@ struct CitiesView: View {
             BackgroundView()
             VStack(alignment: .leading, spacing: 0) {
                 
-                // --- City selection (compact) ---
                 ScrollViewReader { proxy in
                     ScrollView(.horizontal, showsIndicators: false) {
                         HStack(spacing: 8) {
@@ -62,7 +61,6 @@ struct CitiesView: View {
                 }
                 .padding(.bottom, 10)
                 
-                // --- News list en estilo card coherente ---
                 ScrollView {
                     LazyVStack(spacing: 12) {
                         ForEach(filteredNews) { article in
@@ -85,7 +83,6 @@ struct CitiesView: View {
     }
 }
 
-// --- City chip compact (más pequeño y discreto) ---
 
 private struct CityChipCompact: View {
     let title: String
@@ -114,8 +111,6 @@ private struct CityChipCompact: View {
         .buttonStyle(.plain)
     }
 }
-
-// --- ARTICLE CARD ROW (estilo card con material) ---
 
 private struct ArticleCardRow: View {
     var article: NewsArticle
@@ -159,36 +154,33 @@ private struct ArticleCardRow: View {
     }
 }
 
-// --- ARTICLE DETAIL VIEW (imagen más abajo y estilo coherente) ---
-
 struct ArticleDetailView: View {
     let article: NewsArticle
     
+    let cornerRadius: CGFloat = 18
+
     var body: some View {
         ZStack {
             BackgroundView()
                 .ignoresSafeArea()
             
             ScrollView {
-                VStack(spacing: 12) {
-                    // Margen superior más generoso para bajar la imagen
+                VStack(spacing: 0) {
                     Spacer(minLength: 12)
                         .frame(height: 12)
                     
-                    // Imagen principal con overlay y esquinas continuas
                     Image(article.imageName)
                         .resizable()
                         .scaledToFill()
                         .frame(maxWidth: .infinity, minHeight: 210, maxHeight: 250)
-                        .clipShape(RoundedRectangle(cornerRadius: 18, style: .continuous))
+                        .clipShape(TopRoundedRectangle(radius: cornerRadius))
                         .overlay(
-                            RoundedRectangle(cornerRadius: 18, style: .continuous)
+                            TopRoundedRectangle(radius: cornerRadius)
                                 .stroke(.white.opacity(0.15), lineWidth: 1)
                         )
                         .padding(.horizontal)
                         .padding(.top, 6)
                     
-                    // Card de contenido
                     VStack(alignment: .leading, spacing: 10) {
                         Text(article.title)
                             .font(.title3.bold())
@@ -210,10 +202,14 @@ struct ArticleDetailView: View {
                             .font(.body)
                             .foregroundStyle(.primary)
                     }
-                    .padding(14)
-                    .background(.ultraThinMaterial, in: RoundedRectangle(cornerRadius: 18, style: .continuous))
+                    .padding(.vertical, 14)
+                    .padding(.horizontal, 20)
+                    .background(
+                        .ultraThinMaterial,
+                        in: BottomRoundedRectangle(radius: cornerRadius)
+                    )
                     .overlay(
-                        RoundedRectangle(cornerRadius: 18, style: .continuous)
+                        BottomRoundedRectangle(radius: cornerRadius)
                             .stroke(.white.opacity(0.12), lineWidth: 1)
                     )
                     .shadow(radius: 10, y: 5)
@@ -221,12 +217,48 @@ struct ArticleDetailView: View {
                     .padding(.bottom, 10)
                 }
             }
-            // Dejamos la barra de navegación visible; no ignoramos el safe area superior
         }
         .navigationTitle("")
         .navigationBarTitleDisplayMode(.inline)
     }
 }
+
+private struct TopRoundedRectangle: Shape {
+    var radius: CGFloat
+    
+    func path(in rect: CGRect) -> Path {
+        var path = Path()
+        
+        path.move(to: CGPoint(x: rect.minX, y: rect.minY + radius))
+        path.addArc(center: CGPoint(x: rect.minX + radius, y: rect.minY + radius), radius: radius, startAngle: Angle(degrees: 180), endAngle: Angle(degrees: 270), clockwise: false)
+        path.addLine(to: CGPoint(x: rect.maxX - radius, y: rect.minY))
+        path.addArc(center: CGPoint(x: rect.maxX - radius, y: rect.minY + radius), radius: radius, startAngle: Angle(degrees: 270), endAngle: Angle(degrees: 0), clockwise: false)
+        path.addLine(to: CGPoint(x: rect.maxX, y: rect.maxY))
+        path.addLine(to: CGPoint(x: rect.minX, y: rect.maxY))
+        path.closeSubpath()
+        
+        return path
+    }
+}
+
+private struct BottomRoundedRectangle: Shape {
+    var radius: CGFloat
+    
+    func path(in rect: CGRect) -> Path {
+        var path = Path()
+        
+        path.move(to: CGPoint(x: rect.minX, y: rect.minY))
+        path.addLine(to: CGPoint(x: rect.maxX, y: rect.minY))
+        path.addLine(to: CGPoint(x: rect.maxX, y: rect.maxY - radius))
+        path.addArc(center: CGPoint(x: rect.maxX - radius, y: rect.maxY - radius), radius: radius, startAngle: Angle(degrees: 0), endAngle: Angle(degrees: 90), clockwise: false)
+        path.addLine(to: CGPoint(x: rect.minX + radius, y: rect.maxY))
+        path.addArc(center: CGPoint(x: rect.minX + radius, y: rect.maxY - radius), radius: radius, startAngle: Angle(degrees: 90), endAngle: Angle(degrees: 180), clockwise: false)
+        path.closeSubpath()
+        
+        return path
+    }
+}
+
 
 struct CitiesView_Previews: PreviewProvider {
     static var previews: some View {

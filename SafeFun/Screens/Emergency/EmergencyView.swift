@@ -28,7 +28,6 @@ struct EmergencyView: View {
     @State private var selectedPlace: EmergencyPlace?
     @State private var route: MKRoute?
     
-    // Inicializador
     init() {
         _cameraPosition = State(initialValue: .region(defaultRegion))
     }
@@ -37,7 +36,7 @@ struct EmergencyView: View {
 
     private let places: [EmergencyPlace] = [
         EmergencyPlace(
-            name: "Social Point, Public Park",
+            name: "Punto de reunión con fans",
             coordinate: CLLocationCoordinate2D(latitude: 19.412137923774363, longitude: -99.1691600083961),
             type: .safeZone
         ),
@@ -49,7 +48,7 @@ struct EmergencyView: View {
         EmergencyPlace(
             name: "USA Embassy",
             coordinate: CLLocationCoordinate2D(latitude: 19.43299737282861, longitude: -99.16628878905449),
-            type: .supportCenter // Usamos 'supportCenter' para embajadas
+            type: .supportCenter
         ),
         EmergencyPlace(
             name: "Canadian Embassy",
@@ -64,7 +63,7 @@ struct EmergencyView: View {
         EmergencyPlace(
             name: "Hospital",
             coordinate: CLLocationCoordinate2D(latitude: 19.416887007762636, longitude: -99.15208366685509),
-            type: .clinic
+            type: .hospital
         ),
         EmergencyPlace(
             name: "Estadio Banorte",
@@ -72,7 +71,7 @@ struct EmergencyView: View {
             type: .safeZone
         ),
         EmergencyPlace(
-            name: "Police Department (Centro Histórico)",
+            name: "Departamento de policía (Centro Histórico)",
             coordinate: CLLocationCoordinate2D(latitude: 19.4330, longitude: -99.1332),
             type: .police
         ),
@@ -82,22 +81,22 @@ struct EmergencyView: View {
             type: .hospital
         ),
         EmergencyPlace(
-            name: "Support Center to Forgeineers(Coyoacán)",
+            name: "Cenrto de apoyo a extranjeros (Coyoacán)",
             coordinate: CLLocationCoordinate2D(latitude: 19.3498, longitude: -99.1622),
             type: .supportCenter
         ),
         EmergencyPlace(
-            name: "Safe Spot (Rectoría UNAM)",
+            name: "Punto de reunión con fans (Rectoría UNAM)",
             coordinate: CLLocationCoordinate2D(latitude: 19.3325, longitude: -99.1890),
             type: .safeZone
         ),
         EmergencyPlace(
-            name: "Clinic (Santa Fe)",
+            name: "Clínica (Santa Fe)",
             coordinate: CLLocationCoordinate2D(latitude: 19.3630, longitude: -99.2735),
             type: .clinic
         ),
         EmergencyPlace(
-            name: "Airport T2 (Support Center for Travelers)",
+            name: "Aeropuerto T2 (Centro de apoyo a viajantes)",
             coordinate: CLLocationCoordinate2D(latitude: 19.4390, longitude: -99.0800),
             type: .supportCenter
         ),
@@ -107,12 +106,12 @@ struct EmergencyView: View {
             type: .hospital
         ),
         EmergencyPlace(
-            name: "Police Station (Polanco)",
+            name: "Estación de policía (Polanco)",
             coordinate: CLLocationCoordinate2D(latitude: 19.4310, longitude: -99.1920),
             type: .police
         ),
         EmergencyPlace(
-            name: "Clinic (Condesa)",
+            name: "Clínica (Condesa)",
             coordinate: CLLocationCoordinate2D(latitude: 19.4145, longitude: -99.1685),
             type: .clinic
         )
@@ -186,7 +185,7 @@ struct EmergencyView: View {
                 } label: {
                     HStack(spacing: 10) {
                         Image(systemName: "phone_fill")
-                        Text("Emergency")
+                        Text("Emergencia")
                             .font(.system(size: 20, weight: .bold, design: .rounded))
                     }
                     .font(.system(size: 20, weight: .bold))
@@ -218,9 +217,9 @@ struct EmergencyView: View {
                         Spacer()
                     }
 
-                    EmergencyActionRow(title: "Notifying trusted contacts", status: contactsStatus)
-                    EmergencyActionRow(title: "Alerting nearby users", status: nearbyUsersStatus)
-                    EmergencyActionRow(title: "Notifying your communities", status: communitiesStatus)
+                    EmergencyActionRow(title: "Notificando a contactos de emergencia", status: contactsStatus)
+                    EmergencyActionRow(title: "Alertando a usuarios cercanos", status: nearbyUsersStatus)
+                    EmergencyActionRow(title: "Notificando a tus comunidades", status: communitiesStatus)
 
                     HStack {
                         if allDone {
@@ -229,7 +228,7 @@ struct EmergencyView: View {
                             } label: {
                                 HStack(spacing: 8) {
                                     Image(systemName: "phone.circle.fill")
-                                    Text("Call 911")
+                                    Text("Llamar al 911")
                                 }
                                 .font(.system(size: 16, weight: .semibold))
                                 .padding(.horizontal, 16)
@@ -244,7 +243,7 @@ struct EmergencyView: View {
                         Button {
                             resetOverlay()
                         } label: {
-                            Text(allDone ? "Close" : "Cancel")
+                            Text(allDone ? "Cerrar" : "Cancelar")
                                 .font(.system(size: 16, weight: .semibold))
                                 .padding(.horizontal, 16)
                                 .padding(.vertical, 10)
@@ -287,7 +286,6 @@ struct EmergencyView: View {
             if let place = selectedPlace {
                 calculateRoute(to: place)
             } else {
-                // Si se des-selecciona, borra la ruta
                 route = nil
             }
         }
@@ -442,10 +440,10 @@ private struct EmergencyActionRow: View {
     private var statusLabel: some View {
         Text({
             switch status {
-            case .pending: return "Pending"
-            case .sending: return "Sending…"
-            case .sent:    return "Sent"
-            case .failed:  return "Failed"
+            case .pending: return "Pendiente"
+            case .sending: return "Enviando…"
+            case .sent:    return "Enviado"
+            case .failed:  return "Falló"
             }
         }())
         .font(.caption)
@@ -453,7 +451,6 @@ private struct EmergencyActionRow: View {
     }
 }
 
-// Hacemos el struct 'Equatable' para poder compararlos
 private struct EmergencyPlace: Identifiable, Equatable {
     let id = UUID()
     let name: String

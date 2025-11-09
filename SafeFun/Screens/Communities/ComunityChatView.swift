@@ -7,14 +7,12 @@
 
 import SwiftUI
 
-// Un modelo ligero para representar la comunidad seleccionada
 struct CommunityLite: Identifiable, Hashable {
     let id: UUID
     let name: String
     let emoji: String
 }
 
-// Modelo de mensaje
 struct ChatMessage: Identifiable, Hashable {
     let id = UUID()
     let authorName: String
@@ -29,14 +27,13 @@ struct ComunityChatView: View {
 
     @Environment(\.dismiss) private var dismiss
 
-    // Mensajes de muestra por defecto (solo se usarán si isNew == false)
     private static let sampleMessages: [ChatMessage] = [
-        ChatMessage(authorName: "Ana",   text: "Hi everyone 👋",                                 timestamp: Date().addingTimeInterval(-3600), isCurrentUser: false),
-        ChatMessage(authorName: "Luis",  text: "Is anyone going to the fan fest today?",     timestamp: Date().addingTimeInterval(-3400), isCurrentUser: false),
-        ChatMessage(authorName: "You",   text: "I'll be there around 6pm.",                    timestamp: Date().addingTimeInterval(-3300), isCurrentUser: true),
-        ChatMessage(authorName: "Maria", text: "Great, let's meet at the main entrance 🚪",    timestamp: Date().addingTimeInterval(-3200), isCurrentUser: false),
-        ChatMessage(authorName: "You",   text: "Any parking recommendations?",                 timestamp: Date().addingTimeInterval(-3100), isCurrentUser: true),
-        ChatMessage(authorName: "Carlos",text: "Lot B is usually less crowded.",                 timestamp: Date().addingTimeInterval(-3000), isCurrentUser: false)
+        ChatMessage(authorName: "Ana",   text: "Hola a todos 👋",                                 timestamp: Date().addingTimeInterval(-3600), isCurrentUser: false),
+        ChatMessage(authorName: "Luis",  text: "¿Quién va a ir al fanfest de hoy?",     timestamp: Date().addingTimeInterval(-3400), isCurrentUser: false),
+        ChatMessage(authorName: "You",   text: "Yo llegaré al rededor de las 6pm",                    timestamp: Date().addingTimeInterval(-3300), isCurrentUser: true),
+        ChatMessage(authorName: "Maria", text: "Genial, ¿Nos vemos en la entrada?🚪",    timestamp: Date().addingTimeInterval(-3200), isCurrentUser: false),
+        ChatMessage(authorName: "You",   text: "¿Saben si hay estacionamiento?",                 timestamp: Date().addingTimeInterval(-3100), isCurrentUser: true),
+        ChatMessage(authorName: "Carlos",text: "Sí hay!, el lote B esta más vacío por lo regular",                 timestamp: Date().addingTimeInterval(-3000), isCurrentUser: false)
     ]
 
     @State private var messages: [ChatMessage] = []
@@ -44,7 +41,6 @@ struct ComunityChatView: View {
     @State private var draft: String = ""
     @FocusState private var inputFocused: Bool
     
-    // --- AÑADIDO --- Estado para mostrar la alerta de profanidad
     @State private var showingProfanityAlert = false
 
     init(community: CommunityLite, isNew: Bool = false) {
@@ -78,7 +74,7 @@ struct ComunityChatView: View {
                     VStack(alignment: .leading, spacing: 2) {
                         Text(community.name)
                             .font(.headline)
-                        Text("Community chat")
+                        Text("Chat de la comunidad")
                             .font(.caption)
                             .foregroundStyle(.secondary)
                     }
@@ -94,7 +90,6 @@ struct ComunityChatView: View {
                     alignment: .bottom
                 )
 
-                // Mensajes
                 if messages.isEmpty {
                     EmptyChatView()
                         .onTapGesture { inputFocused = false }
@@ -103,7 +98,6 @@ struct ComunityChatView: View {
                         .onTapGesture { inputFocused = false }
                 }
 
-                // Input
                 ChatInputBar(
                     draft: $draft,
                     onSend: sendMessage
@@ -113,15 +107,15 @@ struct ComunityChatView: View {
                 .padding(.vertical, 8)
                 .background(.ultraThinMaterial)
             }
-            // --- AÑADIDO --- El modificador de alerta que se disparará
-            .alert("Message not sent", isPresented: $showingProfanityAlert) {
-                Button("OK", role: .cancel) { }
+
+            .alert("Mensaje no enviado", isPresented: $showingProfanityAlert) {
+                Button("Continuar", role: .cancel) { }
             } message: {
-                Text("Your message couldn't sent, because it contains inappropiate content.")
+                Text("Tu mensaje no pudo ser enviado porque contenía contenido inapropiado.")
             }
         }
         .onAppear {
-            if messages.isEmpty { // evitar re-asignar en reaparecer
+            if messages.isEmpty {
                 messages = isNew ? [] : Self.sampleMessages
             }
         }
@@ -129,19 +123,16 @@ struct ComunityChatView: View {
         .toolbar(.hidden, for: .navigationBar)
     }
 
-    // Lógica de filtro añadida a sendMessage
     private func sendMessage() {
         let trimmed = draft.trimmingCharacters(in: .whitespacesAndNewlines)
         guard !trimmed.isEmpty else { return }
 
         if isMessageObscene(text: trimmed) {
             
-            // Si es profano, no se envía y activa la alerta
             showingProfanityAlert = true
             
         } else {
             
-            // happy path, enviarlo
             withAnimation(.easeInOut) {
                 messages.append(ChatMessage(authorName: "You", text: trimmed, timestamp: Date(), isCurrentUser: true))
                 draft = ""
@@ -159,10 +150,10 @@ private struct EmptyChatView: View {
             Image(systemName: "bubble.left.and.bubble.right")
                 .font(.system(size: 36, weight: .medium))
                 .foregroundStyle(.secondary)
-            Text("No messages yet")
+            Text("Sin mensaejs")
                 .font(.headline)
                 .foregroundStyle(.primary)
-            Text("Start the conversation by sending the first message.")
+            Text("Inicia la conversación enviando el primer mensaje.")
                 .font(.subheadline)
                 .foregroundStyle(.secondary)
         }
@@ -183,13 +174,11 @@ private struct ChatMessagesList: View {
                             .id(message.id)
                             .padding(.horizontal)
                     }
-                    // Spacer al final para que el último mensaje no quede pegado
                     Color.clear.frame(height: 6)
                 }
                 .padding(.top, 10)
             }
             .onChange(of: messages.count) { _, _ in
-                // Autoscroll al último mensaje
                 if let lastID = messages.last?.id {
                     DispatchQueue.main.async {
                         withAnimation(.easeOut) {
@@ -222,8 +211,6 @@ private struct ChatBubble: View {
                         .padding(.horizontal, 6)
                 }
 
-                // Estilos con mayor contraste
-                // Asumimos que 'Color.wcPurple' está definido en tu proyecto
                 let userStyle: AnyShapeStyle = AnyShapeStyle(Color.wcPurple.opacity(0.95))
                 let otherStyle: AnyShapeStyle = AnyShapeStyle(Color.white.opacity(0.96))
 
@@ -269,7 +256,7 @@ private struct ChatInputBar: View {
 
     var body: some View {
         HStack(spacing: 8) {
-            TextField("Write a message…", text: $draft, axis: .vertical)
+            TextField("Escribe un mensaje…", text: $draft, axis: .vertical)
                 .textInputAutocapitalization(.sentences)
                 .autocorrectionDisabled(false)
                 .padding(.horizontal, 12)

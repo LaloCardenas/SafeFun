@@ -30,6 +30,12 @@ private let blockedWords: Set<String> = [
     // Español
     "mierda",
     "pendejo",
+    "tontos",
+    "pene",
+    "armas",
+    "idiota",
+    "estúpido",
+    "mames",
     "estupido",
     "cabron",
     "puta",
