@@ -9,13 +9,22 @@ import SwiftUI
 
 @main
 struct SafeFunApp: App {
+    @StateObject private var launchManager = LaunchManager()
+    
     var body: some Scene {
         WindowGroup {
-            RootView()
+            if launchManager.isLoading {
+                LaunchLoadingView()
+                    .environmentObject(launchManager) // <-- ADD THIS MODIFIER
+            } else {
+                RootView()
+            }
         }
     }
 }
 
+
+// Your RootView remains unchanged as it handles its own logic
 struct RootView: View {
     @State private var showCompleteProfile = false
     @State private var goToCommunities = false
@@ -25,11 +34,11 @@ struct RootView: View {
             WelcomeView()
         }
         .sheet(isPresented: $showCompleteProfile) {
-            CompleteProfileView{
+            CompleteProfileView {
                 showCompleteProfile = false
                 goToCommunities = true
             }
-                .interactiveDismissDisabled(true)
+            .interactiveDismissDisabled(true)
         }
     }
 }

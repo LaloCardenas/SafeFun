@@ -23,7 +23,6 @@ struct WelcomeView: View {
     ]
 
     // Diccionario local de traducciones solo para esta vista
-    // Claves: id lógico del texto. Valores: traducciones por código de idioma.
     private let translations: [String: [String: String]] = [
         "title": [
             "en": "Welcome to SafeFun!",
@@ -176,20 +175,21 @@ struct WelcomeView: View {
                 .padding(.horizontal)
             }
             .toolbar(.hidden, for: .navigationBar)
-            
-            NavigationLink(
-                destination: AppTabView(), isActive: $goToCommunities
-            ){ EmptyView()}
-                .hidden()
         }
+        // Presentación del perfil como sheet
         .sheet(isPresented: $showCompleteProfile) {
             CompleteProfileView(onFinish: {
                 showCompleteProfile = false
-                
+                // Al cerrar el sheet, mostramos AppTabView a pantalla completa (sin back)
                 DispatchQueue.main.asyncAfter(deadline: .now() + 0.2) {
                     goToCommunities = true
                 }
-            }).interactiveDismissDisabled(true)
+            })
+            .interactiveDismissDisabled(true)
+        }
+        // Lanzamos AppTabView como fullScreenCover para que no haya botón de back
+        .fullScreenCover(isPresented: $goToCommunities) {
+            AppTabView()
         }
     }
 

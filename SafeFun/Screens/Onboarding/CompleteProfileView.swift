@@ -29,9 +29,9 @@ struct CompleteProfileView: View {
             VStack(spacing: 0) {
                 // Encabezado
                 VStack(spacing: 8) {
-                    Text("Completa tu perfil")
+                    Text("Complete your profile")
                         .font(.title2.bold())
-                    Text("Ayúdanos a personalizar tu experiencia.")
+                    Text("Help us personalize your experience.")
                         .font(.callout)
                         .foregroundStyle(.secondary)
                 }
@@ -42,13 +42,13 @@ struct CompleteProfileView: View {
                     VStack(spacing: 16) {
                         AvatarPicker(image: $vm.avatar, selection: $vm.photoItem)
 
-                        SectionCard(title: "Información básica") {
-                            GlassField(systemIcon: "person.fill", placeholder: "Nombre", text: $vm.name)
+                        SectionCard(title: "Basic information") {
+                            GlassField(systemIcon: "person.fill", placeholder: "Name", text: $vm.name)
                                 .submitLabel(.next)
                                 .focused($focused, equals: .name)
                                 .onSubmit { focused = .handle }
 
-                            GlassField(systemIcon: "at", placeholder: "Usuario (@handle)", text: $vm.handle)
+                            GlassField(systemIcon: "at", placeholder: "Username (@handle)", text: $vm.handle)
                                 .textInputAutocapitalization(.never)
                                 .autocorrectionDisabled()
                                 .submitLabel(.next)
@@ -57,7 +57,7 @@ struct CompleteProfileView: View {
 
                             // Hint de validación del handle
                             if !vm.handle.trimmed.isEmpty && !vm.isHandleValid {
-                                Text("Usa 3–20 caracteres: letras, números, punto, guion y guion bajo. Puedes empezar con @.")
+                                Text("Use 3–20 characters: letters, numbers, dot, hyphen, or underscore. You may start with @.")
                                     .font(.footnote)
                                     .foregroundStyle(.red.opacity(0.9))
                                     .fixedSize(horizontal: false, vertical: true)
@@ -66,18 +66,18 @@ struct CompleteProfileView: View {
                             TeamPicker(selected: $vm.team)
                         }
 
-                        SectionCard(title: "Contacto") {
-                            GlassField(systemIcon: "phone.fill", placeholder: "Teléfono", text: $vm.phone, keyboard: .phonePad)
+                        SectionCard(title: "Contact") {
+                            GlassField(systemIcon: "phone.fill", placeholder: "Phone", text: $vm.phone, keyboard: .phonePad)
                                 .focused($focused, equals: .phone)
 
                             Divider().opacity(0.15)
 
-                            GlassField(systemIcon: "person.text.rectangle", placeholder: "Nombre contacto de emergencia", text: $vm.emergencyName)
+                            GlassField(systemIcon: "person.text.rectangle", placeholder: "Emergency contact name", text: $vm.emergencyName)
                                 .submitLabel(.next)
                                 .focused($focused, equals: .emergencyName)
                                 .onSubmit { focused = .emergencyPhone }
 
-                            GlassField(systemIcon: "phone.arrow.up.right", placeholder: "Tel. contacto de emergencia", text: $vm.emergencyPhone, keyboard: .phonePad)
+                            GlassField(systemIcon: "phone.arrow.up.right", placeholder: "Emergency contact phone", text: $vm.emergencyPhone, keyboard: .phonePad)
                                 .focused($focused, equals: .emergencyPhone)
                         }
 
@@ -85,7 +85,7 @@ struct CompleteProfileView: View {
                         HStack(alignment: .top, spacing: 8) {
                             Image(systemName: "lock.shield")
                                 .font(.headline)
-                            Text("Solo usaremos tu contacto de emergencia para avisos críticos. Puedes cambiar esta información más tarde en **Perfil > Contacto de emergencia**.")
+                            Text("We’ll only use your emergency contact for critical alerts. You can change this anytime in **Profile > Emergency contact**.")
                                 .font(.footnote)
                                 .foregroundStyle(.secondary)
                         }
@@ -105,7 +105,7 @@ struct CompleteProfileView: View {
                     Button {
                         Task { await finish(onSkip: true) }
                     } label: {
-                        Text("Omitir por ahora")
+                        Text("Skip for now")
                             .font(.callout)
                             .underline()
                             .foregroundStyle(.secondary)
@@ -117,7 +117,7 @@ struct CompleteProfileView: View {
                     } label: {
                         HStack {
                             if vm.isSaving { ProgressView().tint(.white) }
-                            Text(vm.isSaving ? "Guardando..." : "Continuar")
+                            Text(vm.isSaving ? "Saving..." : "Continue")
                                 .bold()
                         }
                         .frame(maxWidth: .infinity)
@@ -137,7 +137,7 @@ struct CompleteProfileView: View {
         .toolbar {
             ToolbarItemGroup(placement: .keyboard) {
                 Spacer()
-                Button("Ocultar") { focused = nil }
+                Button("Hide") { focused = nil }
             }
         }
         .onAppear { vm.loadDefaultsIfAny() }
@@ -257,7 +257,7 @@ private struct AvatarPicker: View {
             }
 
             PhotosPicker(selection: $selection, matching: .images) {
-                Label("Elegir foto", systemImage: "camera.fill")
+                Label("Choose photo", systemImage: "camera.fill")
                     .font(.callout.bold())
                     .padding(.vertical, 8)
                     .padding(.horizontal, 14)
@@ -325,7 +325,7 @@ private struct GlassField: View {
 
 private struct TeamPicker: View {
     @Binding var selected: String
-    private let teams = ["México", "Estados Unidos", "Canada", "Otro…"]
+    private let teams = ["Mexico", "United States", "Canada", "Other…"]
 
     var body: some View {
         Menu {
